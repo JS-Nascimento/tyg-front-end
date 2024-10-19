@@ -2,24 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Configuração das variáveis de cor para temas claros e escuros */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background-light: #ffffff;
+  --foreground-light: #171717;
+  --background-dark: #0a0a0a;
+  --foreground-dark: #ededed;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Tema padrão (claro) */
+@layer base {
+  body {
+    @apply border-gray-100 text-black;
+    color: var(--foreground-light);
+    background-color: var(--background-light);
+    font-family: Arial, Helvetica, sans-serif;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tema escuro com preferências de esquema de cor */
+@media (prefers-color-scheme: dark) {
+  @layer base {
+    body {
+      color: var(--foreground-dark);
+      background-color: var(--background-dark);
+    }
+  }
 }
 
+/* Estilo personalizado para utilitário adicional */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
