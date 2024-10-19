@@ -66,14 +66,13 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    const sidebarElement = document.querySelector('.sidebar');
-    if (sidebarElement && !sidebarElement.contains(event.target as Node) && !isLargeScreen) {
-      setIsSidebarOpen(false);
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebarElement = document.querySelector('.sidebar');
+      if (sidebarElement && !sidebarElement.contains(event.target as Node) && !isLargeScreen) {
+        setIsSidebarOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -87,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
         <div
           className={`sidebar fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 bg-gray-100 dark:bg-zinc-950 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0 lg:relative lg:z-auto lg:w-64 `}
+          } m-1.5 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg lg:m-0 lg:border-0 lg:rounded-none lg:shadow-none lg:translate-x-0 lg:relative lg:z-auto lg:w-64`}
         >
           <nav className="flex h-full min-h-0 flex-col">
             <div
