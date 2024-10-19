@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { SunIcon, MoonIcon, AdjustmentsHorizontalIcon, ClipboardDocumentListIcon, LightBulbIcon} from '@heroicons/react/20/solid';
+import { SunIcon, MoonIcon, AdjustmentsHorizontalIcon, ClipboardDocumentListIcon, LightBulbIcon, ArrowRightStartOnRectangleIcon, ChevronUpIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
 
 interface UserProfileProps {
   title: string;
@@ -90,34 +90,27 @@ const UserProfile: React.FC<UserProfileProps> = ({
             </span>
           )}
         </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          className="ml-auto size-5"
-          aria-hidden="true"
-        >
-          <path
-            fillRule="evenodd"
-            d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z"
-            clipRule="evenodd"
-          />
-        </svg>
+        {dropdownDirection === 'up' && (
+          <ChevronUpIcon className="ml-auto size-5" />
+        )}
+        {dropdownDirection === 'down' && (
+          <ChevronDownIcon className="ml-auto size-5" />
+        )}
       </button>
       {isOpen && (
         <div
           className={`absolute ${dropdownOrientationClass} ${dropdownPositionClass} w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dark:bg-background-alternativedark`}
         >
-          {showNameEmail && (
-            <div className="mt-1.5 ml-2.5 mr-1.5 mb-1.5">
-              <span className="pl-1.5 block truncate text-sm font-medium text-zinc-950 dark:text-white">
-                {title}
-              </span>
-              <span className="pl-1.5 block truncate text-xs font-normal text-zinc-500 dark:text-zinc-400">
-                {subtitle}
-              </span>
-            </div>
-          )}
+
+          <div className="mt-1.5 ml-2.5 mr-1.5 mb-1.5">
+            <span className="pl-1.5 block truncate text-sm font-medium text-zinc-950 dark:text-white">
+              {title}
+            </span>
+            <span className="pl-1.5 block truncate text-xs font-normal text-zinc-500 dark:text-zinc-400">
+              {subtitle}
+            </span>
+          </div>
+
           <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
           <div className="py-1" role="menu" aria-orientation="vertical">
             {/* Opções do menu */}
@@ -156,6 +149,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             </div>
             <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
             <a href="#" className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600" role="menuitem">
+              <ArrowRightStartOnRectangleIcon className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
               Logout
             </a>
           </div>

@@ -9,9 +9,11 @@ export interface Notification {
 
 interface NotificationDropdownProps {
   notifications: Notification[];
+  showTitle?: boolean;
 }
 
-const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications }) => {
+const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notifications,
+                                                                   showTitle = true}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notificationList, setNotificationList] = useState<Notification[]>(notifications);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -25,7 +27,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
 
   // Função para alternar o estado do dropdown
   const toggleDropdown = () => setIsOpen(!isOpen);
-
+  const dropdownPosition = showTitle ? 'left-1.5' :  '-right-6' ;
   // Marca a notificação como lida ao passar o foco
   const markAsRead = (id: number) => {
     setNotificationList((prevList) =>
@@ -61,13 +63,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificatio
       </span>
           )}
         </div>
-        <span className="m-1.5 text-zinc-950 bg-zinc-100 dark:text-white dark:bg-white/10" >Inbox</span>
+        {showTitle && <span className="m-1.5 text-zinc-950 bg-zinc-100 dark:text-white dark:bg-white/10">Inbox</span>}
       </button>
-
 
       {isOpen && (
         <div
-          className="absolute left-1.5-0 mt-2 w-96 bg-white rounded-md shadow-lg overflow-hidden ring-1 ring-black ring-opacity-5 z-10">
+          className={`absolute ${dropdownPosition} mt-2 w-96 bg-white rounded-md shadow-lg overflow-hidden ring-1 ring-black ring-opacity-5 z-10`}>
           <div className="max-h-60 overflow-y-auto">
             {notificationList.length === 0 ? (
               <div className="p-4 text-gray-500">Nenhuma notificação</div>

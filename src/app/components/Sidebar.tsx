@@ -186,7 +186,11 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
                     clip-rule="evenodd" />
             </svg>
           </button>
-          <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} dropdownDirection={"down"} imageShape={"rounded"} showNameEmail={false} dropdownPosition={'left'}/>
+          <div className="flex items-center gap-2">
+          <NotificationDropdown notifications={notifications || []} showTitle={false}/>
+          <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} dropdownDirection={"down"}
+                       imageShape={"rounded"} showNameEmail={false} dropdownPosition={'left'} />
+          </div>
         </header>
         {children}
       </div>
