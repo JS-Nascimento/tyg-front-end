@@ -8,29 +8,37 @@
   --foreground-light: #171717;
   --background-dark: #0a0a0a;
   --foreground-dark: #ededed;
+  --hover-light: #f0f0f0;
+  --hover-dark: #2563eb;
+  --hover-alternative-dark: rgba(255, 255, 255, 0.05);
+  --spanColor-light: #333333;
+  --spanColor-dark: #dddddd;
+  --read-light: #f3f4f6;
+  --read-dark: #3f3f46;
+  --read-alternative-dark: rgba(255, 255, 255, 0.05);
+  --unread-light: #ffffff;
+  --unread-dark: #ffffff;
 }
 
 /* Tema padrão (claro) */
 @layer base {
   body {
-    @apply border-gray-100 text-black;
     color: var(--foreground-light);
     background-color: var(--background-light);
+    border-color: #f3f4f6;
     font-family: Arial, Helvetica, sans-serif;
   }
 }
 
-/* Tema escuro com preferências de esquema de cor */
-@media (prefers-color-scheme: dark) {
-  @layer base {
-    body {
-      color: var(--foreground-dark);
-      background-color: var(--background-dark);
-    }
+/* Tema escuro usando a classe 'dark' */
+@layer base {
+  .dark body {
+    color: var(--foreground-dark);
+    background-color: var(--background-dark);
   }
 }
 
-/* Estilo personalizado para utilitário adicional */
+/* Estilo personalizado para utilitários adicionais */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
