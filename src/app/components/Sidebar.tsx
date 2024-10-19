@@ -1,9 +1,17 @@
 'use client';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import UserProfile from '@/app/components/UserProfile';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChartBarIcon, CreditCardIcon, HomeIcon } from '@heroicons/react/16/solid';
+import {
+  ChartBarIcon,
+  CreditCardIcon,
+  HomeIcon,
+  QuestionMarkCircleIcon,
+  SparklesIcon,
+  Bars4Icon,
+  XMarkIcon,
+} from '@heroicons/react/16/solid';
 import { BellIcon, PrinterIcon } from '@heroicons/react/24/solid';
 import NotificationDropdown from '@/app/components/NotificationDropdown';
 import { Notification } from '@/app/components/NotificationDropdown';
@@ -19,6 +27,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmail, userAvatar, notifications }) => {
   const [activeItem, setActiveItem] = useState('#1');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean | null>(null);
+  const [isLargeScreen, setIsLargeScreen] = useState(true);
 
   const menuItems = [
     { name: 'Home', href: '#1', icon: <HomeIcon className="w-6 h-6" /> },
@@ -28,21 +38,71 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
     { name: 'Alertas', href: '#5', icon: <BellIcon className="w-6 h-6" /> },
   ];
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const handleResize = () => {
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      setIsLargeScreen(true);
+      setIsSidebarOpen(true);
+    } else {
+      setIsLargeScreen(false);
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isSidebarOpen === null) {
+      handleResize();
+    }
+  }, [isSidebarOpen]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleClickOutside = (event: MouseEvent) => {
+    const sidebarElement = document.querySelector('.sidebar');
+    if (sidebarElement && !sidebarElement.contains(event.target as Node) && !isLargeScreen) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLargeScreen]);
+
   return (
     <>
       <div
-        className="relative isolate flex min-h-svh w-full bg-white max-lg:flex-col lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
-        <div className="fixed inset-y-0 left-0 w-64 max-lg:hidden">
+        className="relative isolate flex min-h-svh w-full bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
+        <div
+          className={`sidebar fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 bg-gray-100 dark:bg-zinc-950 ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 lg:relative lg:z-auto lg:w-64 `}
+        >
           <nav className="flex h-full min-h-0 flex-col">
             <div
               className="flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5">
               <div data-slot="section" className="flex flex-col gap-0.5">
+                {isSidebarOpen && !isLargeScreen && <div className="flex items-center justify-between">
+                  <button
+                    aria-label="Toggle navigation"
+                    onClick={toggleSidebar}
+                    className="p-2 rounded-lg  focus:outline-solid focus:outline-gray-300 hover:bg-hover-light dark:hover:bg-hover-dark"
+                  >
+                    <XMarkIcon className="w-6 h-6 text-gray-700" />
+                  </button>
+                </div>
+                }
                 <span className="relative">
                   <div className="cursor-default flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6
                   font-medium text-zinc-950 sm:py-2 sm:text-sm/5 data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0
@@ -78,7 +138,8 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
                 <NotificationDropdown notifications={notifications || []} />
               </div>
             </div>
-            <div className="flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
+            <div
+              className="flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
               <div data-slot="section" className="flex flex-col gap-0.5">
                 {menuItems.map((item) => (
                   <span className="relative" key={item.href}>
@@ -124,20 +185,8 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
                   className="absolute left-1/2 top-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 [@media(pointer:fine)]:hidden"
                   aria-hidden="true"
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  data-slot="icon"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="truncate">Support</span>
+                <QuestionMarkCircleIcon className="w-6 h-6" />
+                <span className="truncate">Suporte</span>
               </a>
             </span>
                 <span className="relative">
@@ -151,17 +200,8 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
                   className="absolute left-1/2 top-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 [@media(pointer:fine)]:hidden"
                   aria-hidden="true"
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  data-slot="icon"
-                >
-                  <path
-                    d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633L6.95 5.684ZM13.949 13.684a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632l-.183-.551Z" />
-                </svg>
-                <span className="truncate">Changelog</span>
+                <SparklesIcon className="w-6 h-6" />
+                <span className="truncate">Atualizações</span>
               </a>
             </span>
               </div>
@@ -174,25 +214,24 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
             </div>
           </nav>
         </div>
-        <header className="flex items-center justify-between px-4 lg:hidden">
-          <button
-            aria-label="Toggle navigation"
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg focus:outline-none"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-              <path fill-rule="evenodd"
-                    d="M3 6.75A.75.75 0 0 1 3.75 6h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 6.75ZM3 12a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm0 5.25a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z"
-                    clip-rule="evenodd" />
-            </svg>
-          </button>
-          <div className="flex items-center gap-2">
-          <NotificationDropdown notifications={notifications || []} showTitle={false}/>
-          <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} dropdownDirection={"down"}
-                       imageShape={"rounded"} showNameEmail={false} dropdownPosition={'left'} />
-          </div>
-        </header>
-        {children}
+        {/* Main content */}
+        <div className={`flex-1 flex flex-col min-h-svh ${isSidebarOpen ? '-ml-64' : 'ml-0'}`}>
+          <header className="flex items-center justify-between px-4 lg:hidden">
+            <button
+              aria-label="Toggle navigation"
+              onClick={toggleSidebar}
+              className="p-2 rounded-lg  focus:outline-solid focus:outline-gray-300 hover:bg-hover-light dark:hover:bg-hover-dark"
+            >
+              <Bars4Icon className="w-6 h-6 text-gray-700" />
+            </button>
+            <div className="flex items-center gap-2">
+              <NotificationDropdown notifications={notifications || []} showTitle={false} />
+              <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} dropdownDirection={'down'}
+                           imageShape={'rounded'} showNameEmail={false} dropdownPosition={'left'} />
+            </div>
+          </header>
+          {children}
+        </div>
       </div>
       {/*<next-route-announcer style={{ position: "absolute" }} />*/}
     </>
