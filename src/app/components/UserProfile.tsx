@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { SunIcon, MoonIcon, AdjustmentsHorizontalIcon, ClipboardDocumentListIcon, LightBulbIcon, ArrowRightStartOnRectangleIcon, ChevronUpIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
+import { useTheme } from '../themes/ThemeContext';
 
 interface UserProfileProps {
   title: string;
@@ -26,22 +27,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
                                                    imageShape = 'circle', // Default para imagem circular
                                                  }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
-  };
-
   // Função para fechar o menu ao clicar fora ou perder o foco
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
