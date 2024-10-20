@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InboxArrowDownIcon } from '@heroicons/react/20/solid';
+import { Notification } from '@/app/types/Notification';
 
-export interface Notification {
-  id: number;
-  message: string;
-  read: boolean;
-}
 
 interface NotificationDropdownProps {
   notifications: Notification[];

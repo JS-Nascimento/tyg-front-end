@@ -1,33 +1,33 @@
-// ThemeContext.tsx
-'use client';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+'use client'
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// Define o tipo para o contexto do tema
 interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-// Cria o contexto do tema
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Provedor do contexto do tema
-export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Verifica o tema inicial com base na classe 'dark' do <html>
-    return document.documentElement.classList.contains('dark');
-  });
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Verifica se está no lado do cliente antes de acessar o document
+    if (typeof document !== 'undefined') {
+      const initialTheme = document.documentElement.classList.contains('dark');
+      setIsDarkMode(initialTheme);
+    }
+  }, []);
 
   const toggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      const newMode = !prev;
-      if (newMode) {
+    setIsDarkMode(!isDarkMode);
+    if (typeof document !== 'undefined') {
+      if (!isDarkMode) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
-      return newMode;
-    });
+    }
   };
 
   return (
@@ -37,7 +37,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
-// Hook personalizado para usar o contexto de tema
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {

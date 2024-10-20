@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/16/solid';
 import { BellIcon, PrinterIcon } from '@heroicons/react/24/solid';
 import NotificationDropdown from '@/app/components/NotificationDropdown';
-import { Notification } from '@/app/components/NotificationDropdown';
+import { Notification } from '@/app/types/Notification';
 
 interface SidebarProps {
   children: ReactNode;
@@ -30,10 +30,11 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean | null>(null);
   const [isLargeScreen, setIsLargeScreen] = useState(true);
 
+  // rotas aqui para paginas
   const menuItems = [
-    { name: 'Home', href: '#1', icon: <HomeIcon className="w-6 h-6" /> },
+    { name: 'Home', href: '/', icon: <HomeIcon className="w-6 h-6" /> },
     { name: 'Contas', href: '#2', icon: <CreditCardIcon className="w-6 h-6" /> },
-    { name: 'Análises', href: '#3', icon: <ChartBarIcon className="w-6 h-6" /> },
+    { name: 'Análises', href: '/analysis', icon: <ChartBarIcon className="w-6 h-6" /> },
     { name: 'Relatórios', href: '#4', icon: <PrinterIcon className="w-6 h-6" /> },
     { name: 'Alertas', href: '#5', icon: <BellIcon className="w-6 h-6" /> },
   ];
