@@ -1,24 +1,20 @@
 // app/page.tsx
-
 import React from 'react';
-import WorkArea from '@/app/components/WorkArea';
-import Card from '@/app/components/Card';
+import DashboardArea from './components/DashboardArea';
 
 export default function Home() {
-  const cards: { title: string; content: string; size: '3x3' | '6x6' | '9x9' | '12x6' | '3x2' }[] = [
-    { title: 'Card 1', content: 'Descrição do Card 1', size: '3x3' },
-    { title: 'Card 2', content: 'Descrição do Card 2', size: '6x6' },
-    { title: 'Card 3', content: 'Descrição do Card 3', size: '9x9' },
-    { title: 'Card 4', content: 'Descrição do Card 4', size: '12x6' },
+  const cards = [
+    { order: 1, title: 'Card 0', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
+    { order: 2, title: 'Card 12', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
+    { order: 3, title: 'Card 1b2', content: 'Conteúdo do Card 1', size: { w: 3, h: 6 } },
+    { order: 4, title: 'Card 1c2', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
+    { order: 5, title: 'Card 1d2', content: 'Conteúdo do Card 1', size: { w: 6, h: 3 } },
+    { order: 6, title: 'Card 2', content: 'Conteúdo do Card 2', size: { w: 6, h: 6 } },
+    { order: 7, title: 'Card 3', content: 'Conteúdo do Card 3', size: { w: 6, h: 9 } },
+    { order: 8, title: 'Card 4', content: 'Conteúdo do Card 4', size: { w: 12, h: 6 } },
   ];
-  return (
-    <>
-      <WorkArea title="Dashboard">
-        {cards.map((card, index) => (
-          <Card key={index} title={card.title} content={card.content} size={card.size} />
-        ))}
-      </WorkArea>
-    </>
-  );
-};
 
+  return (
+    <DashboardArea title="Dashboard" cards={cards} />
+  );
+}

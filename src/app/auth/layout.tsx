@@ -14,14 +14,8 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <html lang="en">
-    <body>
-    <ThemeProvider>
-      <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh' }}>
+      <div className="auth-container">
         {children}
       </div>
-    </ThemeProvider>
-    </body>
-    </html>
   );
 }

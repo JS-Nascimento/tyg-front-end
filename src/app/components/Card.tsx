@@ -1,29 +1,18 @@
-// app/components/Card.tsx
 import React from 'react';
 
-interface CardProps {
+ export interface CardProps {
+  key?: string
+  order: number;
   title: string;
-  content: string | React.ReactNode;
-  size: '3x3' | '3x2' | '6x6' | '9x9' | '12x6';
+  content: string;
+  size: { w: number; h: number };
 }
-
-const sizeClasses = {
-  '3x3': 'w-3/12 h-3/12',
-  '3x2': 'w-3/12 h-2/12',
-  '6x6': 'w-6/12 h-6/12',
-  '9x9': 'w-9/12 h-9/12',
-  '12x6': 'w-full h-6/12',
-};
-
-const Card: React.FC<CardProps> = ({ title, content, size }) => {
-  const cardSizeClass = sizeClasses[size];
+const Card: React.FC<CardProps> = ({key,  title, content}) => {
 
   return (
-    <div className={`p-4 bg-blue-100 rounded-lg shadow-md dark:bg-blue-900 ${cardSizeClass}`}>
-      <h2 className="text-lg font-bold">{title}</h2>
-      <div className="mt-2 text-sm">
-        {content}
-      </div>
+    <div key={key} className={`bg-white  dark:bg-background-dark shadow-md p-4 rounded-md`} style={{ width: '100%', height: '100%' }}>
+      <h2 className="text-xl font-bold mb-2">{title}</h2>
+      <p>{content}</p>
     </div>
   );
 };

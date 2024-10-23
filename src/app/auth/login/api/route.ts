@@ -1,4 +1,4 @@
-// the route is /api/auth/login
+
 import { loginFormSchema } from '@/app/lib/validations/LoginValidation';
 import { NextRequest, NextResponse } from 'next/server';
 

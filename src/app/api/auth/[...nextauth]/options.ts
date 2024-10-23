@@ -2,21 +2,30 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextAuthOptions, User } from 'next-auth';
 
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: 'Username', type: 'text' },
+        email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          console.log('Missing email or password');
+          return null;
+        }
 
-        // Lógica para autenticar o usuário (substitua isso pela sua lógica real)
-        const user: User = { id: '123', name: 'Jorge', email: 'sardinha.jorge@gmail.com' };
-        return user;
+        // Lógica de autenticação simulada
+        if (credentials.email === 'sardinha.jorge@gmail.com' && credentials.password === 'senha123') {
+          const user: User = { id: '123', name: 'Jorge', email: 'sardinha.jorge@gmail.com' };
+          console.log('User authenticated:', user);
+          return user;
+        }
+
+        console.log('Invalid credentials');
+        // Se a autenticação falhar, retorne null
+        return null;
       },
     }),
   ],

@@ -1,21 +1,19 @@
 // app/layout.tsx
-import type { Metadata } from 'next';
+'use client';
 import './globals.css';
 import React from 'react';
 import Sidebar from '@/app/components/Sidebar';
 import { Notification } from '@/app/types/Notification';
 import { ThemeProvider } from '@/app/themes/ThemeContext';
-
-export const metadata: Metadata = {
-  title: 'TYG Investments',
-  description: 'Track your growth investments',
-};
+import { usePathname } from 'next/navigation';
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname();
+  const shouldRenderSidebar = !pathname.startsWith('/auth');
 
   const notificationList: Notification[] = [
     { id: 1, message: 'Relatório de Fechamento Mensal finalizado', read: false },
@@ -27,6 +25,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
     <body>
     <ThemeProvider>
+      {shouldRenderSidebar ? (
       <Sidebar
         logoUrl={'/tyg-logo.png'}
         userEmail={'sardinha.jorge@gmail.com'}
@@ -36,6 +35,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
         {children}
       </Sidebar>
+      ) : (
+        children
+      )}
     </ThemeProvider>
     </body>
     </html>
