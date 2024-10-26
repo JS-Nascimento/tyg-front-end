@@ -25,6 +25,7 @@ async function verifyAndDecodeToken(token: string): Promise<TokenPayload> {
       token,
       new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
     );
+    console.log('Token payload:', payload);
     return payload as unknown as TokenPayload;
   } catch (error) {
     console.error('Token verification failed:', error);
@@ -77,6 +78,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
+      // Agora o authorize atualizado
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
@@ -102,6 +104,10 @@ export const authOptions: NextAuthOptions = {
           const auth: AuthResponse = await response.json();
           const decodedToken = await verifyAndDecodeToken(auth.accessToken);
 
+          console.log(auth)
+          console.log(decodedToken)
+
+          // Retorna o user com todos os campos necessários
           return {
             id: decodedToken.sub,
             name: decodedToken.preferred_username,
@@ -109,6 +115,7 @@ export const authOptions: NextAuthOptions = {
             accessToken: auth.accessToken,
             refreshToken: auth.refreshToken,
             expiresIn: Date.now() + auth.expiresIn,
+            tokenType: auth.tokenType
           };
         } catch (error) {
           console.error('Authorization error:', error);
@@ -121,26 +128,26 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
   },
   callbacks: {
-    async jwt({ token, user}) {
-
+    async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.expiresIn = user.expiresIn;
-        token.sub = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        return token;
+        return {
+          accessToken: user.accessToken,
+          refreshToken: user.refreshToken,
+          expiresIn: user.expiresIn,
+          tokenType: user.tokenType,
+          sub: user.id,
+          name: user.name,
+          email: user.email,
+        };
       }
 
-      const now = Date.now()/1000;
+      const now = Date.now() / 1000;
 
       if (typeof token.expiresIn === 'number' && token.expiresIn < now) {
-        return token;
+        return refreshAccessToken(token);
       }
 
-      // Access token expired, refresh it
-      return refreshAccessToken(token);
+      return token;
     },
 
     async session({ session, token }) {

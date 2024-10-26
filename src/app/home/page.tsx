@@ -1,6 +1,6 @@
 // app/page.tsx
 import React from 'react';
-import DashboardArea from './components/DashboardArea';
+import DashboardArea from '../components/DashboardArea';
 
 export default function Home() {
   const cards = [

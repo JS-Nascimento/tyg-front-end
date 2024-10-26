@@ -3,8 +3,18 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { SunIcon, MoonIcon, AdjustmentsHorizontalIcon, ClipboardDocumentListIcon, LightBulbIcon, ArrowRightStartOnRectangleIcon, ChevronUpIcon, ChevronDownIcon} from '@heroicons/react/20/solid';
+import {
+  SunIcon,
+  MoonIcon,
+  AdjustmentsHorizontalIcon,
+  ClipboardDocumentListIcon,
+  LightBulbIcon,
+  ArrowRightStartOnRectangleIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from '@heroicons/react/20/solid';
 import { useTheme } from '../themes/ThemeContext';
+import { useAuth } from '@/app/hook/useAuth';
 
 interface UserProfileProps {
   title: string;
@@ -29,6 +39,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode, toggleDarkMode } = useTheme();
   const menuRef = useRef<HTMLDivElement>(null);
+  const { logout } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -38,6 +49,13 @@ const UserProfile: React.FC<UserProfileProps> = ({
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
       setIsOpen(false);
     }
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    await logout()
+      if (isDarkMode) {
+        toggleDarkMode();
+      }
   };
 
   useEffect(() => {
@@ -105,19 +123,27 @@ const UserProfile: React.FC<UserProfileProps> = ({
           <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
           <div className="py-1" role="menu" aria-orientation="vertical">
             {/* Opções do menu */}
-            <a href="#" className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600" role="menuitem">
-              <ClipboardDocumentListIcon className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
+            <a href="#"
+               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
+               role="menuitem">
+              <ClipboardDocumentListIcon
+                className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
               Perfil
             </a>
-            <a href="#" className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600" role="menuitem">
-              <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
+            <a href="#"
+               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
+               role="menuitem">
+              <AdjustmentsHorizontalIcon
+                className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
               Configurações
             </a>
             <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
             <div className="py-2 px-4">
               <span className="flex items-center gap-2">
-                <LightBulbIcon className="h-4 w-4  text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
-                <span className="text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600">Tema</span>
+                <LightBulbIcon
+                  className="h-4 w-4  text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
+                <span
+                  className="text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600">Tema</span>
                 <button
                   onClick={toggleDarkMode}
                   className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
@@ -139,8 +165,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
               </span>
             </div>
             <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
-            <a href="#" className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600" role="menuitem">
-              <ArrowRightStartOnRectangleIcon className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
+            <a onClick={handleLogout}
+               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
+               role="menuitem">
+              <ArrowRightStartOnRectangleIcon
+                className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
               Logout
             </a>
           </div>

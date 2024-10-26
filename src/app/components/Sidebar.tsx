@@ -15,20 +15,35 @@ import {
 import { BellIcon, PrinterIcon } from '@heroicons/react/24/solid';
 import NotificationDropdown from '@/app/components/NotificationDropdown';
 import { Notification } from '@/app/types/Notification';
+import { useAuth } from '@/app/hook/useAuth';
 
 interface SidebarProps {
   children: ReactNode;
   logoUrl: string;
-  userName: string;
-  userAvatar: string;
-  userEmail: string;
-  notifications: Notification[];
+  userName?: string;
+  userAvatar?: string;
+  userEmail?: string;
+  notifications?: Notification[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmail, userAvatar, notifications }) => {
+const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl }) => {
   const [activeItem, setActiveItem] = useState('#1');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(true);
+  const auth = useAuth();
+
+  const authProps: SidebarProps = {
+    children,
+    logoUrl,
+    userName: auth.user?.name || '',
+    userEmail: auth.user?.email || '',
+    userAvatar: '/avatar.jpg',
+    notifications: [
+      { id: 1, message: 'Relatório de Fechamento Mensal finalizado', read: false },
+      { id: 2, message: 'Análise de desempenho de ativo finalizado', read: false },
+      { id: 3, message: 'Sua mensalidade está próxima do vencimento', read: false },
+    ],
+  };
 
   // rotas aqui para paginas
   const menuItems = [
@@ -86,10 +101,10 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
         className="relative isolate flex min-h-svh w-full bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
         <div
           className={`sidebar fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 bg-gray-100 dark:bg-zinc-950 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } m-1.5 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg lg:m-0 lg:border-0 lg:rounded-none lg:shadow-none lg:translate-x-0 lg:relative lg:z-auto lg:w-64`}
+            isSidebarOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full'
+          } m-1.5 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg lg:m-0 lg:border-0 lg:rounded-none lg:shadow-none lg:translate-x-0 lg:relative`}
         >
-          <nav className="flex h-full min-h-0 flex-col">
+          <nav className="flex h-full min-h-0 flex-col ">
             <div
               className="flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5">
               <div data-slot="section" className="flex flex-col gap-0.5">
@@ -135,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
                 data-slot="section"
                 className="max-lg:hidden flex flex-col gap-0.5"
               >
-                <NotificationDropdown notifications={notifications || []} />
+                <NotificationDropdown notifications={authProps.notifications || []} />
               </div>
             </div>
             <div
@@ -209,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
             <div
               className="max-lg:hidden flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5">
               <div data-slot="section" className="flex flex-col gap-0.5">
-                <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} />
+                <UserProfile title={authProps.userName || ''} subtitle={authProps.userEmail || ''} avatarUrl={authProps.userAvatar || ''} />
               </div>
             </div>
           </nav>
@@ -225,8 +240,8 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl, userName, userEmai
               <Bars4Icon className="w-6 h-6 text-gray-700" />
             </button>
             <div className="flex items-center gap-2">
-              <NotificationDropdown notifications={notifications || []} showTitle={false} />
-              <UserProfile title={userName} subtitle={userEmail} avatarUrl={userAvatar} dropdownDirection={'down'}
+              <NotificationDropdown notifications={authProps.notifications || []} showTitle={false} />
+              <UserProfile title={authProps.userName || ''} subtitle={authProps.userEmail || ''} avatarUrl={authProps.userAvatar || ''}  dropdownDirection={'down'}
                            imageShape={'rounded'} showNameEmail={false} dropdownPosition={'left'} />
             </div>
           </header>
