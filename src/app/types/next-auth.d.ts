@@ -15,6 +15,7 @@ declare module 'next-auth' {
     id: string;
     name: string;
     email: string;
+    avatar: string;
   }
 
   // Estende o tipo base do usuário com informações do token

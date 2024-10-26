@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl }) => {
 
   // rotas aqui para paginas
   const menuItems = [
-    { name: 'Home', href: '/', icon: <HomeIcon className="w-6 h-6" /> },
+    { name: 'Home', href: '/home', icon: <HomeIcon className="w-6 h-6" /> },
     { name: 'Contas', href: '#2', icon: <CreditCardIcon className="w-6 h-6" /> },
     { name: 'Análises', href: '/analysis', icon: <ChartBarIcon className="w-6 h-6" /> },
     { name: 'Relatórios', href: '#4', icon: <PrinterIcon className="w-6 h-6" /> },

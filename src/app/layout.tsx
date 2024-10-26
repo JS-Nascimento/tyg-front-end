@@ -16,7 +16,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const pathname = usePathname();
    const shouldRenderSidebar = !pathname.startsWith('/auth');
 
-
   return (
     <html lang="en">
     <body>

@@ -19,11 +19,65 @@ interface TokenPayload {
   exp: number;
 }
 
+interface User {
+  tenantId: string;
+  name: string;
+  email: string;
+  enabled: boolean;
+}
+
+async function getUserInfo(token: string): Promise<User> {
+  try {
+    if (!token || token === 'undefined') {
+      throw new Error('Missing token');
+    }
+    const response = await fetch(
+      `${process.env.URL_API_TYG_INVESTMENTS}/${process.env.API_PATH_V1}/users/me`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        credentials: 'include',
+      },
+    );
+    console.log('API URL:', `${process.env.URL_API_TYG_INVESTMENTS}/${process.env.API_PATH_V1}/users/me`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      console.error('Error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      });
+      throw new Error(`Authentication failed: ${response.status}`);
+    }
+
+    const userInfo: User = await response.json();
+
+    if (!userInfo.tenantId || !userInfo.name) {
+      throw new Error('Invalid user info response');
+    }
+
+    return {
+      tenantId: userInfo.tenantId,
+      name: userInfo.name,
+      email: userInfo.email,
+      enabled: userInfo.enabled,
+    };
+  } catch (error) {
+    console.error('Error getting users info:', error);
+    throw error;
+  }
+
+}
+
 async function verifyAndDecodeToken(token: string): Promise<TokenPayload> {
   try {
     const { payload } = await jwtVerify(
       token,
-      new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
+      new TextEncoder().encode(process.env.NEXTAUTH_SECRET),
     );
     console.log('Token payload:', payload);
     return payload as unknown as TokenPayload;
@@ -41,7 +95,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: token.refreshToken }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -51,6 +105,8 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     const refreshedTokens: AuthResponse = await response.json();
     const decodedToken = await verifyAndDecodeToken(refreshedTokens.accessToken);
 
+    const userInfo = await getUserInfo(refreshedTokens.accessToken);
+
     return {
       ...token,
       accessToken: refreshedTokens.accessToken,
@@ -58,8 +114,10 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       refreshToken: refreshedTokens.refreshToken ?? token.refreshToken,
       tokenType: refreshedTokens.tokenType,
       sub: decodedToken.sub,
-      name: decodedToken.preferred_username,
+      id: userInfo.tenantId,
+      name: userInfo.name,
       email: decodedToken.preferred_username,
+      avatar: '',
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
@@ -78,7 +136,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      // Agora o authorize atualizado
+
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
@@ -94,7 +152,7 @@ export const authOptions: NextAuthOptions = {
                 email: credentials.email,
                 password: credentials.password,
               }),
-            }
+            },
           );
 
           if (!response.ok) {
@@ -104,18 +162,18 @@ export const authOptions: NextAuthOptions = {
           const auth: AuthResponse = await response.json();
           const decodedToken = await verifyAndDecodeToken(auth.accessToken);
 
-          console.log(auth)
-          console.log(decodedToken)
+          // Aguarda a resposta do getUserInfo
+          const userInfo = await getUserInfo(auth.accessToken);
 
-          // Retorna o user com todos os campos necessários
           return {
-            id: decodedToken.sub,
-            name: decodedToken.preferred_username,
-            email: credentials.email,
+            id: userInfo.tenantId,
+            name: userInfo.name,
+            email: decodedToken.preferred_username,
             accessToken: auth.accessToken,
             refreshToken: auth.refreshToken,
             expiresIn: Date.now() + auth.expiresIn,
-            tokenType: auth.tokenType
+            tokenType: auth.tokenType,
+            avatar: '',
           };
         } catch (error) {
           console.error('Authorization error:', error);
