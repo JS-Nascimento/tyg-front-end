@@ -162,7 +162,6 @@ export const authOptions: NextAuthOptions = {
           const auth: AuthResponse = await response.json();
           const decodedToken = await verifyAndDecodeToken(auth.accessToken);
 
-          // Aguarda a resposta do getUserInfo
           const userInfo = await getUserInfo(auth.accessToken);
 
           return {
