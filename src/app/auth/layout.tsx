@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import '../../app/globals.css';
 import React from 'react';
-import { ThemeProvider } from '@/app/themes/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'TYG Investments',

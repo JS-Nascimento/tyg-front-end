@@ -1,7 +1,7 @@
 // middleware.ts
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { getMiddlewareConfig } from "@/app/config/route"
+import { getMiddlewareConfig, isPublicRoute, isStaticFile } from '@/app/config/route';
 
 const publicRoutes = [
   '/auth/login',
@@ -10,12 +10,22 @@ const publicRoutes = [
   '/actuator',
 ];
 
+// Array de extensões e pastas que devem ser ignoradas pelo middleware
+const publicFiles = [
+  '/favicon.ico',
+  '/tyg-logo.png', // ou qualquer outra imagem específica
+  '/_next',        // arquivos do Next.js
+  '/images',       // pasta de imagens se você tiver uma
+  '/assets',       // outros assets
+  '/public',       // pasta public inteira
+];
+
 export default withAuth(
   async function middleware(request: NextRequestWithAuth) {
     const pathname = request.nextUrl.pathname;
 
-    // Verifica se é uma rota pública
-    if (publicRoutes.some(route => pathname.startsWith(route))) {
+    // Verifica se é arquivo estático ou rota pública
+    if (isStaticFile(pathname) || isPublicRoute(pathname)) {
       return NextResponse.next();
     }
 
@@ -60,8 +70,7 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const pathname = req.nextUrl.pathname;
 
-        // Permite acesso a rotas públicas
-        if (publicRoutes.some(route => pathname.startsWith(route))) {
+        if (isStaticFile(pathname) || isPublicRoute(pathname)) {
           return true;
         }
 

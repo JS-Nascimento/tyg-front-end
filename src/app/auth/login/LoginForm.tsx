@@ -1,28 +1,41 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { useLoading } from '@/app/components/LoadingSystem';
+import TygLogo from '@/app/components/TygLogo';
+
 
 const LoginForm: React.FC = () => {
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const { startLoading, stopLoading } = useLoading();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const email = (event.currentTarget as any).email.value;
-    const password = (event.currentTarget as any).password.value;
+    setError(null);
 
-    // Tenta fazer login usando o NextAuth
-    const result = await signIn('credentials', {
-      redirect: false, // Evita redirecionamento automático para lidar com erros
-      email,
-      password,
-      'callbackUrl': '/home',
-    });
+    try {
+      startLoading();
+      const email = (event.currentTarget as any).email.value;
+      const password = (event.currentTarget as any).password.value;
 
-    // Verifica se houve erro no login
-    if (result?.error) {
-      setError('Invalid credentials, please try again.');
-    } else {
-      // Redireciona para a página inicial após o login bem-sucedido
-      window.location.href = '/home';
+      // Tenta fazer login usando o NextAuth
+      const result = await signIn('credentials', {
+        redirect: false, // Evita redirecionamento automático para lidar com erros
+        email,
+        password,
+        'callbackUrl': '/home',
+      });
+
+      // Verifica se houve erro no login
+      if (result?.error) {
+        setError('Invalid credentials, please try again.');
+      } else {
+        // Redireciona para a página inicial após o login bem-sucedido
+        window.location.href = '/home';
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.' + error);
+    } finally {
+      stopLoading(); // Garante que o loading será removido mesmo em caso de erro
     }
   };
 
@@ -78,8 +91,9 @@ const LoginForm: React.FC = () => {
             </form>
           </div>
           <div className="md:h-full bg-[#000842] rounded-xl lg:p-12 p-8">
-            <img src="https://readymadeui.com/signin-image.webp" className="w-full h-full object-contain"
-                 alt="login-image" />
+            <div className="md:h-full bg-[#000842] rounded-xl lg:p-12 p-8 relative min-h-[300px]">
+              <TygLogo/>
+            </div>
           </div>
         </div>
       </div>

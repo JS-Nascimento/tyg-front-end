@@ -1,6 +1,13 @@
 // app/page.tsx
 import React from 'react';
 import DashboardArea from '../components/DashboardArea';
+import type { Metadata } from 'next';
+
+
+export const metadata: Metadata = {
+  title: 'TYG Investments',
+  description: 'Track your growth investments',
+};
 
 export default function Home() {
   const cards = [

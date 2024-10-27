@@ -16,16 +16,19 @@ interface DashboardArea {
 const DashboardArea: React.FC<DashboardArea> = ({ title, cards = [] }) => {
   // Define layouts com base nos tamanhos específicos dos cards
   const defaultLayouts: Layout[] = cards.map((card, index) => {
+    // Define valores padrão para `size` caso não estejam definidos
+    const { w, h } = card.size ?? { w: 2, h: 2 };
+
     // Calcula a posição `x` para garantir alinhamento correto
-    const x = (index * card.size.w) % 12;
-    const y = Math.floor((index * card.size.w) / 12);
+    const x = (index * h) % 12;
+    const y = Math.floor((index * w) / 12);
 
     return {
       i: index.toString(),
       x, // Usa o valor calculado de `x`
       y, // Usa o valor calculado de `y`
-      w: card.size.w, // Largura do card em colunas
-      h: card.size.h, // Altura do card em linhas
+      w: w, // Largura do card em colunas
+      h: h, // Altura do card em linhas
       static: false, // Pode ser movido
     };
   });
@@ -55,12 +58,10 @@ const DashboardArea: React.FC<DashboardArea> = ({ title, cards = [] }) => {
             {cards.map((card, index) => (
               <div key={index.toString()} className="bg-white dark:bg-background-dark shadow-md rounded-md" >
                 <Card
-                  key={index.toString()}
-                  order={card.order}
+                  id={index}
                   title={card.title}
                   content={card.content}
-                  size={card.size}
-                />
+                      />
               </div>
             ))}
           </ResponsiveGridLayout>
