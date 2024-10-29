@@ -4,8 +4,8 @@ import 'next-auth';
 declare module 'next-auth' {
   // Tipo base para informações do token
   interface TokenData {
-    accessToken?: string;
-    refreshToken?: string;
+    accessToken: string;
+    refreshToken: string;
     expiresIn: number;
     tokenType?: string;
   }

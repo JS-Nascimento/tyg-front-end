@@ -17,6 +17,7 @@
     "autoprefixer": "^10.4.20",
     "clsx": "^2.1.1",
     "cryptr": "^6.3.0",
+    "currency-icons": "^1.0.14",
     "faker-js": "^1.0.0",
     "framer-motion": "^11.11.9",
     "jwt-decode": "^4.0.0",

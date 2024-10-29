@@ -4,7 +4,8 @@ import React from 'react';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import Card, { CardProps } from './Card';
+import Card, { CardProps } from './CardComponent';
+import CardComponent from '@/app/components/CardComponent';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -17,7 +18,7 @@ const DashboardArea: React.FC<DashboardArea> = ({ title, cards = [] }) => {
   // Define layouts com base nos tamanhos específicos dos cards
   const defaultLayouts: Layout[] = cards.map((card, index) => {
     // Define valores padrão para `size` caso não estejam definidos
-    const { w, h } = card.size ?? { w: 2, h: 2 };
+    const { w, h } = card.size ?? { w: 3, h: 2 };
 
     // Calcula a posição `x` para garantir alinhamento correto
     const x = (index * h) % 12;
@@ -57,7 +58,7 @@ const DashboardArea: React.FC<DashboardArea> = ({ title, cards = [] }) => {
           >
             {cards.map((card, index) => (
               <div key={index.toString()} className="bg-white dark:bg-background-dark shadow-md rounded-md" >
-                <Card
+                <CardComponent
                   id={index}
                   title={card.title}
                   content={card.content}

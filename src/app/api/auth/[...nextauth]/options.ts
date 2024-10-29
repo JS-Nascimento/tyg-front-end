@@ -3,6 +3,18 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextAuthOptions } from 'next-auth';
 import { jwtVerify } from 'jose';
 import { JWT } from 'next-auth/jwt';
+import { cookies } from 'next/headers';
+import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
+
+const TOKEN_COOKIE_NAME = 'auth_token';
+
+const cookieOptions: Partial<ResponseCookie> = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  expires: new Date(Date.now() + (24 * 60 * 60 * 1000)),
+  path: '/',
+};
 
 interface AuthResponse {
   accessToken: string;
@@ -67,6 +79,7 @@ async function getUserInfo(token: string): Promise<User> {
       enabled: userInfo.enabled,
     };
   } catch (error) {
+
     console.error('Error getting users info:', error);
     throw error;
   }
@@ -83,6 +96,7 @@ async function verifyAndDecodeToken(token: string): Promise<TokenPayload> {
     return payload as unknown as TokenPayload;
   } catch (error) {
     console.error('Token verification failed:', error);
+    cookies().delete(TOKEN_COOKIE_NAME);
     throw error;
   }
 }
@@ -107,6 +121,8 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 
     const userInfo = await getUserInfo(refreshedTokens.accessToken);
 
+    cookies().set(TOKEN_COOKIE_NAME, refreshedTokens.accessToken, cookieOptions);
+
     return {
       ...token,
       accessToken: refreshedTokens.accessToken,
@@ -121,6 +137,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
+    cookies().delete(TOKEN_COOKIE_NAME);
     return {
       ...token,
       error: 'RefreshAccessTokenError',
@@ -164,6 +181,8 @@ export const authOptions: NextAuthOptions = {
 
           const userInfo = await getUserInfo(auth.accessToken);
 
+          cookies().set(TOKEN_COOKIE_NAME, auth.accessToken, cookieOptions);
+
           return {
             id: userInfo.tenantId,
             name: userInfo.name,
@@ -175,6 +194,7 @@ export const authOptions: NextAuthOptions = {
             avatar: '',
           };
         } catch (error) {
+          cookies().delete(TOKEN_COOKIE_NAME);
           console.error('Authorization error:', error);
           return null;
         }
@@ -186,6 +206,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+
       if (user) {
         return {
           accessToken: user.accessToken,
@@ -209,6 +230,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token.error) {
+        cookies().delete(TOKEN_COOKIE_NAME);
         return { ...session, error: token.error };
       }
 
@@ -224,9 +246,15 @@ export const authOptions: NextAuthOptions = {
       };
     },
   },
+  events: {
+    async signOut() {
+      cookies().delete(TOKEN_COOKIE_NAME);
+    },
+  },
   debug: process.env.NODE_ENV === 'development',
   session: {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+

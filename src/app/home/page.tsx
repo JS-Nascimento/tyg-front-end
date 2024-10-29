@@ -1,27 +1,58 @@
 // app/page.tsx
-import React from 'react';
+import React, { ReactNode } from 'react';
 import DashboardArea from '../components/DashboardArea';
 import type { Metadata } from 'next';
+import CurrencyItemCard, { CurrencyItemCardProps } from '@/app/components/CurrencyItemCard';
+import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
+import { getCurrencyData } from '@/app/services/CurrencyService';
 
+type CardProps = {
+  order: number;
+  title: string;
+  content: ReactNode;
+  size: { w: number; h: number };
+}
 
 export const metadata: Metadata = {
   title: 'TYG Investments',
   description: 'Track your growth investments',
 };
 
-export default function Home() {
-  const cards = [
-    { order: 1, title: 'Card 0', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
-    { order: 2, title: 'Card 12', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
-    { order: 3, title: 'Card 1b2', content: 'Conteúdo do Card 1', size: { w: 3, h: 6 } },
-    { order: 4, title: 'Card 1c2', content: 'Conteúdo do Card 1', size: { w: 3, h: 3 } },
-    { order: 5, title: 'Card 1d2', content: 'Conteúdo do Card 1', size: { w: 6, h: 3 } },
-    { order: 6, title: 'Card 2', content: 'Conteúdo do Card 2', size: { w: 6, h: 6 } },
-    { order: 7, title: 'Card 3', content: 'Conteúdo do Card 3', size: { w: 6, h: 9 } },
-    { order: 8, title: 'Card 4', content: 'Conteúdo do Card 4', size: { w: 12, h: 6 } },
-  ];
+export default async function Home() {
+  // Buscar dados diretamente no servidor
+  let currencyData: CardProps[] | undefined;
 
+  try {
+    const baseCurrency = await getCurrencyData(); // Busca os dados de forma síncrona no servidor
+    if (baseCurrency && baseCurrency.currencies.length > 0) {
+      // Gera o array de CardProps para todas as moedas
+      currencyData = baseCurrency.currencies
+        .filter(currency => currency.code !== baseCurrency.code)
+        .map((currency, index) => {
+        const props: CurrencyItemCardProps = {
+          code: currency.code,
+          name: currency.name,
+          symbol: currency.symbol,
+          baseCurrency: baseCurrency.code,
+          decimalPlaces: currency.decimalPlaces,
+          conversionRate: currency.conversionRate,
+          icon: getCurrencyIconPath(currency.code),
+        };
+        return {
+          order: index + 1,
+          title: currency.symbol,
+          content: <CurrencyItemCard {...props} />,
+          size: { w: 3, h: 2 },
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Failed to fetch currency data:', error);
+    currencyData = undefined;
+  }
+
+  // Renderiza `DashboardArea` com os dados de moeda
   return (
-    <DashboardArea title="Dashboard" cards={cards} />
+    <DashboardArea title="Dashboard" cards={currencyData} />
   );
 }
