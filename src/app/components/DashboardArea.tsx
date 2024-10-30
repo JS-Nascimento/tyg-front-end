@@ -4,7 +4,7 @@ import React from 'react';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import Card, { CardProps } from './CardComponent';
+import { CardProps } from './CardComponent';
 import CardComponent from '@/app/components/CardComponent';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);

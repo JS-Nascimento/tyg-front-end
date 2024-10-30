@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 
 // Interfaces
 interface LoadingContextType {
@@ -26,26 +26,14 @@ const LoadingContext = createContext<LoadingContextType>({
 
 // Provider do Loading
 export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [loadingStack, setLoadingStack] = useState<number>(0);
+  const [activeLoadings, setActiveLoadings] = useState<number>(0);
 
   const startLoading = useCallback(() => {
-    setLoadingStack(prev => {
-      const newStack = prev + 1;
-      setIsLoading(true);
-      return newStack;
-    });
+    setActiveLoadings(prev => prev + 1);
   }, []);
 
   const stopLoading = useCallback(() => {
-    setLoadingStack(prev => {
-      const newStack = prev - 1;
-      if (newStack <= 0) {
-        setIsLoading(false);
-        return 0;
-      }
-      return newStack;
-    });
+    setActiveLoadings(prev => Math.max(0, prev - 1));
   }, []);
 
   // Função para mostrar loading por um tempo específico
@@ -56,7 +44,7 @@ export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) =>
   }, [startLoading, stopLoading]);
 
   const value = {
-    isLoading,
+    isLoading: activeLoadings > 0,
     startLoading,
     stopLoading,
     showLoading,
@@ -65,7 +53,7 @@ export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) =>
   return (
     <LoadingContext.Provider value={value}>
       {children}
-      {isLoading && (
+      {value.isLoading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <FancyLoading />
         </div>

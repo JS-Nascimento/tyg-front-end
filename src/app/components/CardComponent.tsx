@@ -9,7 +9,7 @@ import React, { ReactNode } from 'react';
     h: number;
   }
 }
-const Card: React.FC<CardProps> = ({id, title, content}) => {
+const Card: React.FC<CardProps> = ({id,  content}) => {
 
   return (
     <div key={id} className={`bg-white  dark:bg-background-dark shadow-md p-4 rounded-md -z-30`} style={{ width: '100%', height: '100%' }}>
