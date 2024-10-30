@@ -1,11 +1,4 @@
-// src/app/lib/routes.ts
-export const PROTECTED_ROUTES = [
-  '/home',
-  '/account',
-  '/dashboard',
-  '/analysis',
-] as const;
-
+// config/routes.ts
 export const EXCLUDED_ROUTES = [
   '_next/static',
   '_next/image',
@@ -26,15 +19,13 @@ export const PUBLIC_ROUTES = [
   '/actuator',
 ] as const;
 
-// type Route = typeof PUBLIC_ROUTES[number] | typeof PROTECTED_ROUTES[number];
-
 // Função auxiliar para verificar se uma rota é pública
-export const isPublicRoute = (pathname: string): boolean => {
+export const isPublicRoute = (pathname: string) => {
   return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
 };
 
 // Função auxiliar para verificar se é um arquivo estático
-export const isStaticFile = (pathname: string): boolean => {
+export const isStaticFile = (pathname: string) => {
   return EXCLUDED_ROUTES.some(route => {
     if (route.startsWith('.*\\.')) {
       const regex = new RegExp(route);
@@ -42,24 +33,4 @@ export const isStaticFile = (pathname: string): boolean => {
     }
     return pathname.startsWith('/' + route);
   });
-};
-
-// Função para verificar se uma rota é protegida
-export const isProtectedRoute = (pathname: string): boolean => {
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route));
-};
-
-// Middleware de autenticação
-export const withAuth = (pathname: string): string | null => {
-  // Se for uma rota pública ou arquivo estático, permite o acesso
-  if (isPublicRoute(pathname) || isStaticFile(pathname)) {
-    return null;
-  }
-
-  // Se for uma rota protegida e não estiver autenticado, redireciona para o login
-  if (isProtectedRoute(pathname)) {
-    return '/auth/login';
-  }
-
-  return null;
 };

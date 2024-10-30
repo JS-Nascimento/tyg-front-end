@@ -1,7 +1,7 @@
 // middleware.ts
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { isPublicRoute, isStaticFile } from '@/app/config/route';
+import { isPublicRoute, isStaticFile } from '@/app/lib/routes';
 
 export default withAuth(
   async function middleware(request: NextRequestWithAuth) {
