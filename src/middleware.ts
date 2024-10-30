@@ -56,15 +56,15 @@ export default withAuth(
   }
 );
 
-// Configuração estática do matcher
 export const config = {
   matcher: [
-    // Rotas protegidas
-    '/home/:path*',
-    '/account/:path*',
-    '/dashboard/:path*',
-    '/analysis/:path*',
-    // Matcher para todas as rotas exceto as excluídas
-    '/((?!_next/static|_next/image|favicon.ico|tyg-logo.png|public|assets|auth|api|.*\\.(?:jpg|jpeg|gif|png|svg|ico|css|js|woff|woff2|ttf|eot)).*)'
-  ]
+    /*
+     * Match all request paths except:
+     * 1. /api routes
+     * 2. /_next (Next.js internals)
+     * 3. /_static (inside /public)
+     * 4. all root files inside /public (e.g. /favicon.ico)
+     */
+    '/((?!api|_next|_static|_vercel|[\\w-]+\\.\\w+).*)',
+  ],
 };
