@@ -3,23 +3,35 @@ import { signIn } from 'next-auth/react';
 import { useLoading } from '@/app/components/LoadingSystem';
 import TygLogo from '@/app/components/TygLogo';
 
+interface FormElements extends HTMLFormControlsCollection {
+  email: HTMLInputElement;
+  password: HTMLInputElement;
+  'remember-me': HTMLInputElement;
+}
+
+interface LoginFormElement extends HTMLFormElement {
+  readonly elements: FormElements;
+}
 
 const LoginForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { startLoading, stopLoading } = useLoading();
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<LoginFormElement>) => {
     event.preventDefault();
     setError(null);
 
     try {
       startLoading();
-      const email = (event.currentTarget as any).email.value;
-      const password = (event.currentTarget as any).password.value;
+
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
 
       // Tenta fazer login usando o NextAuth
       const result = await signIn('credentials', {
-        redirect: false, // Evita redirecionamento automático para lidar com erros
+        redirect: false,
         email,
         password,
         'callbackUrl': '/home',
