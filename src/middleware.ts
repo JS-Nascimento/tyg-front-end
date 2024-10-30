@@ -1,38 +1,18 @@
 // middleware.ts
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { getMiddlewareConfig, isPublicRoute, isStaticFile } from '@/app/config/route';
-
-const publicRoutes = [
-  '/auth/login',
-  '/auth/register',
-  '/about',
-  '/actuator',
-];
-
-// Array de extensões e pastas que devem ser ignoradas pelo middleware
-const publicFiles = [
-  '/favicon.ico',
-  '/tyg-logo.png', // ou qualquer outra imagem específica
-  '/_next',        // arquivos do Next.js
-  '/images',       // pasta de imagens se você tiver uma
-  '/assets',       // outros assets
-  '/public',       // pasta public inteira
-];
+import { isPublicRoute, isStaticFile } from '@/app/config/route';
 
 export default withAuth(
   async function middleware(request: NextRequestWithAuth) {
     const pathname = request.nextUrl.pathname;
 
-    // Verifica se é arquivo estático ou rota pública
     if (isStaticFile(pathname) || isPublicRoute(pathname)) {
       return NextResponse.next();
     }
 
-    // Verifica o token que já está disponível através do NextRequestWithAuth
     const token = request.nextauth.token;
 
-    // Se não houver token
     if (!token) {
       const callbackUrl = encodeURIComponent(request.url);
       return NextResponse.redirect(
@@ -40,7 +20,6 @@ export default withAuth(
       );
     }
 
-    // Verifica se o token está expirado
     const tokenExpireIn = token.expiresIn as number;
 
     if (tokenExpireIn && Date.now() > tokenExpireIn) {
@@ -49,7 +28,6 @@ export default withAuth(
       );
     }
 
-    // Adiciona headers de segurança
     const response = NextResponse.next();
     const securityHeaders = {
       'x-middleware-cache': 'no-cache',
@@ -69,15 +47,24 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const pathname = req.nextUrl.pathname;
-
         if (isStaticFile(pathname) || isPublicRoute(pathname)) {
           return true;
         }
-
         return !!token;
       },
     },
   }
 );
 
-export const config = getMiddlewareConfig();
+// Configuração estática do matcher
+export const config = {
+  matcher: [
+    // Rotas protegidas
+    '/home/:path*',
+    '/account/:path*',
+    '/dashboard/:path*',
+    '/analysis/:path*',
+    // Matcher para todas as rotas exceto as excluídas
+    '/((?!_next/static|_next/image|favicon.ico|tyg-logo.png|public|assets|auth|api|.*\\.(?:jpg|jpeg|gif|png|svg|ico|css|js|woff|woff2|ttf|eot)).*)'
+  ]
+};

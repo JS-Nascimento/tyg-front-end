@@ -11,6 +11,7 @@ import {
   SparklesIcon,
   Bars4Icon,
   XMarkIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/16/solid';
 import { BellIcon, PrinterIcon } from '@heroicons/react/24/solid';
 import NotificationDropdown from '@/app/components/NotificationDropdown';
@@ -48,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children, logoUrl }) => {
   // rotas aqui para paginas
   const menuItems = [
     { name: 'Home', href: '/home', icon: <HomeIcon className="w-6 h-6" /> },
+    { name: 'Moedas', href: '/currencies/history', icon: <CurrencyDollarIcon className="w-6 h-6" /> },
     { name: 'Contas', href: '#2', icon: <CreditCardIcon className="w-6 h-6" /> },
     { name: 'Análises', href: '/analysis', icon: <ChartBarIcon className="w-6 h-6" /> },
     { name: 'Relatórios', href: '#4', icon: <PrinterIcon className="w-6 h-6" /> },
