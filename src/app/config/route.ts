@@ -1,11 +1,4 @@
 // config/routes.ts
-export const PROTECTED_ROUTES = [
-  '/home',
-  '/account',
-  '/dashboard',
-  '/analysis',
-] as const;
-
 export const EXCLUDED_ROUTES = [
   '_next/static',
   '_next/image',
