@@ -1,19 +1,14 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
+import { CurrencyQuotationHistoryDto } from '@/app/types/BaseCurrency';
 
-interface RateData {
-  averageRate: number;
-  maxRate: number;
-  minRate: number;
-  dateOnly: string;
-}
 
 interface RateChartProps {
   baseCurrency: string;
   code: string;
   periodInDays?: number;
-  data: RateData[];
+  data: CurrencyQuotationHistoryDto[];
 }
 
 const RateChart: React.FC<RateChartProps> = ({baseCurrency, code, data }) => {

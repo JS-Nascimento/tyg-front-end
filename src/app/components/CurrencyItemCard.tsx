@@ -1,6 +1,8 @@
+'use client'
 import React from 'react';
 import Image from 'next/image';
 import { ArrowRightIcon } from '@heroicons/react/16/solid';
+import { useRouter } from 'next/navigation';
 
 export interface CurrencyItemCardProps {
   code: string;
@@ -30,6 +32,11 @@ const handleQuotationValue = (value: number) => {
 
 export default function CurrencyItemCard(props: CurrencyItemCardProps) {
   const formattedDate = new Date(props.conversionRate.rateDate).toLocaleString();
+  const router = useRouter();
+
+  const handleNavigate = () => {
+    router.push(`/currencies/${props.code}/history`);
+  };
 
   return (
     <div className="bg-transparent dark:bg-transparent rounded-lg p-1 w-full h-full">
@@ -67,7 +74,8 @@ export default function CurrencyItemCard(props: CurrencyItemCardProps) {
           {/* Botão de histórico */}
           <div className="flex justify-end mt-4">
             <button
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-zinc-700 dark:text-white  hover:bg-hover-light dark:hover:bg-hover-dark transition-colors"
+              onClick={handleNavigate}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-zinc-700 dark:text-white hover:bg-hover-light dark:hover:bg-hover-dark transition-colors"
             >
               Histórico
               <ArrowRightIcon className="w-4 h-4" />

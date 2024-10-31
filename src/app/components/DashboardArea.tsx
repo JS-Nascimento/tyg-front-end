@@ -15,6 +15,7 @@ interface DashboardArea {
 }
 
 const DashboardArea: React.FC<DashboardArea> = ({ title, cards = [] }) => {
+
   // Define layouts com base nos tamanhos específicos dos cards
   const defaultLayouts: Layout[] = cards.map((card, index) => {
     // Define valores padrão para `size` caso não estejam definidos

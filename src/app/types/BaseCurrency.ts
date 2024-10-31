@@ -11,9 +11,16 @@ export interface Currency {
   conversionRate: ConversionRate;
 }
 
-export default interface BaseCurrency {
+export interface BaseCurrency {
   code: string;
   name: string;
   symbol: string;
   currencies: Currency[];
+}
+
+export interface CurrencyQuotationHistoryDto {
+  averageRate: number;
+  maxRate: number;
+  minRate: number;
+  dateOnly: Date;
 }
