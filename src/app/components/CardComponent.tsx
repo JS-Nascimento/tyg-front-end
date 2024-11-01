@@ -9,11 +9,13 @@ import React, { ReactNode } from 'react';
     h: number;
   }
 }
-const Card: React.FC<CardProps> = ({id,  content}) => {
-
+const Card: React.FC<CardProps> = ({ id, content }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Previne a propagação do clique para o grid
+    e.stopPropagation();
+  };
   return (
-    <div key={id} className={`bg-white  dark:bg-background-dark shadow-md p-4 rounded-md -z-30`} style={{ width: '100%', height: '100%' }}>
-      {/*<h2 className="text-xl font-bold mb-2">{title}</h2>*/}
+    <div onClick={handleClick} key={id} className={`bg-white dark:bg-background-dark rounded-md -z-30 `} style={{ width: '100%', height: '100%' }}>
       {content}
     </div>
   );

@@ -39,7 +39,7 @@ export default function CurrencyItemCard(props: CurrencyItemCardProps) {
   };
 
   return (
-    <div className="bg-transparent dark:bg-transparent rounded-lg p-1 w-full h-full">
+    <div className="bg-transparent dark:bg-transparent rounded-lg w-full h-full">
       <div className="flex gap-4">
         {/* Coluna da esquerda - Ícone */}
         <div className="flex-shrink-0">
