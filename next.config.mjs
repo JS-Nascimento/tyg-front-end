@@ -5,6 +5,10 @@ import path from 'path';
 const nextConfig = {
     transpilePackages: ['apexcharts'],
     reactStrictMode: true,
+    images: {
+        domains: [ 'flagcdn.com','restcountries.com'],
+
+    },
     webpack: (config) => {
         config.resolve.alias['@'] = path.resolve('./src');
         return config;
@@ -12,4 +16,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

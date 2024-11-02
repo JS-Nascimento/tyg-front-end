@@ -23,9 +23,9 @@ export default async function Home() {
   let currencyData: CardProps[] | undefined;
 
   try {
-    const baseCurrency = await getCurrencyData(); // Busca os dados de forma síncrona no servidor
+    const baseCurrency = await getCurrencyData();
     if (baseCurrency && baseCurrency.currencies.length > 0) {
-      // Gera o array de CardProps para todas as moedas
+
       currencyData = baseCurrency.currencies
         .filter(currency => currency.code !== baseCurrency.code)
         .map((currency, index) => {
