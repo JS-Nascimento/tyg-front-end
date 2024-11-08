@@ -93,7 +93,7 @@ export const useFetchWithLoading = () => {
 export const usePromiseWithLoading = () => {
   const { startLoading, stopLoading } = useLoading();
 
-  const withLoading = async <T,>(promise: Promise<T>): Promise<T> => {
+  return async <T, >(promise: Promise<T>): Promise<T> => {
     try {
       startLoading();
       const result = await promise;
@@ -102,8 +102,6 @@ export const usePromiseWithLoading = () => {
       stopLoading();
     }
   };
-
-  return withLoading;
 };
 
 // Componente FancyLoading

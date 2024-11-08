@@ -2,7 +2,7 @@
 import 'next-auth';
 
 declare module 'next-auth' {
-  // Tipo base para informações do token
+
   interface TokenData {
     accessToken: string;
     refreshToken: string;
@@ -10,7 +10,6 @@ declare module 'next-auth' {
     tokenType?: string;
   }
 
-  // Tipo base para informações do usuário
   interface UserData {
     id: string;
     name: string;
@@ -18,17 +17,14 @@ declare module 'next-auth' {
     avatar: string;
   }
 
-  // Estende o tipo base do usuário com informações do token
   interface User extends UserData, TokenData {}
 
-  // JWT herda as informações de token e inclui campos adicionais do JWT
   interface JWT extends TokenData {
     sub?: string;
     error?: string;
   }
-
-  // Session organiza as informações de forma estruturada
   interface Session {
+    expires: string;
     user: UserData;
     token: TokenData;
     error?: string;

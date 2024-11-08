@@ -1,13 +1,15 @@
 import type { Config } from 'tailwindcss';
-
+import flowbitePlugin from 'flowbite/plugin';
 
 const config: Config = {
-  darkMode: 'class', // Habilita o modo escuro via classe
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './node_modules/@syncfusion/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  important: true,
   theme: {
     extend: {
       colors: {
@@ -30,7 +32,7 @@ const config: Config = {
         },
         read: {
           light: '#f3f4f6',
-           dark: '#3f3f46',
+          dark: '#3f3f46',
         },
         unread: {
           light: '#ffffff',
@@ -40,9 +42,7 @@ const config: Config = {
     },
   },
   plugins: [
-    require('flowbite/plugin')({
-      charts: true,
-    }),
+    flowbitePlugin,
   ],
 };
 export default config;

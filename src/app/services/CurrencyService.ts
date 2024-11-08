@@ -1,21 +1,32 @@
 // app/services/currencyService.ts
-import { BaseCurrency, Currency, CurrencyQuotationHistoryDto } from '@/app/types/BaseCurrency';
-import { cookies } from 'next/headers';
+import { AvailableCurrency, BaseCurrency, Currency, CurrencyQuotationHistoryDto } from '@/app/interfaces/BaseCurrency';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import HandledError from '@/app/errors/HandledError';
 
-const TOKEN_COOKIE_NAME = 'auth_token';
+const API_URL = process.env.URL_API_TYG_INVESTMENTS && process.env.API_PATH_V1
+  ? `${process.env.URL_API_TYG_INVESTMENTS}/${process.env.API_PATH_V1}`
+  : '';
 
-const API_URL = process.env.URL_API_TYG_INVESTMENTS + '/' + process.env.API_PATH_V1;
+export async function getAuthToken(): Promise<string | null> {
+  const session = await getServerSession(authOptions);
 
-async function getAuthToken(): Promise<string | null> {
-  const cookieStore = cookies();
-  const token = cookieStore.get(TOKEN_COOKIE_NAME);
-  return token?.value || null;
+  if (!session?.token?.accessToken) {
+    console.log('Not authorized', 'Authorization token not found');
+    return null;
+  }
+
+  return session.token.accessToken;
 }
 
 async function handleResponse(response: Response): Promise<BaseCurrency> {
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message);
+    throw {
+      code: response.status,
+      message: error.message || 'An error occurred',
+      details: `Error fetching Available Currencies data from ${response.url}`,
+    } as HandledError;
   }
 
   const data = await response.json();
@@ -42,7 +53,11 @@ export async function getCurrencyData(): Promise<BaseCurrency> {
     const token = await getAuthToken();
 
     if (!token) {
-      throw new Error('Não autorizado');
+      throw {
+        code: 401,
+        message: 'Não autorizado',
+        details: 'Authorization token not found in cookies',
+      } as HandledError;
     }
 
     const response = await fetch(`${API_URL}/currencies`, {
@@ -52,25 +67,34 @@ export async function getCurrencyData(): Promise<BaseCurrency> {
         'Content-Type': 'application/json',
       },
       next: {
-        revalidate: 3600, // cache de 1 hora
+
       },
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch currency');
+      const errorData = await response.json();
+      throw {
+        code: response.status,
+        message: errorData.message || 'Failed to fetch currency',
+        details: `Error fetching currency from ${response.url}`,
+      } as HandledError;
     }
 
     return handleResponse(response);
   } catch (error) {
     console.error('Currency service error:', error);
-    throw error;
+    throw error as HandledError;
   }
 }
 
 async function handleHistoryResponse(response: Response): Promise<CurrencyQuotationHistoryDto[]> {
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message);
+    throw {
+      code: response.status,
+      message: error.message || 'An error occurred',
+      details: `Error fetching CurrencyHistory data from ${response.url}`,
+    } as HandledError;
   }
 
   const data = await response.json();
@@ -88,7 +112,11 @@ export async function getCurrencyHistory(code: string, limit?: number): Promise<
     const token = await getAuthToken();
 
     if (!token) {
-      throw new Error('Não autorizado');
+      throw {
+        code: 401,
+        message: 'Não autorizado',
+        details: 'Authorization token not found in cookies',
+      } as HandledError;
     }
 
     const params = new URLSearchParams({
@@ -112,40 +140,77 @@ export async function getCurrencyHistory(code: string, limit?: number): Promise<
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch currency');
+      const errorData = await response.json();
+      throw {
+        code: response.status,
+        message: errorData.message || 'Failed to fetch history currency',
+        details: `Error fetching ahistory currency from ${response.url}`,
+      } as HandledError;
     }
 
     return handleHistoryResponse(response);
+  } catch (error) {
+    console.error(`Currency history service error for ${code}:`, error);
+    throw error as HandledError;
+  }
+}
+
+async function handleAvaliableCurrenciesResponse(response: Response): Promise<AvailableCurrency[]> {
+  if (!response.ok) {
+    const error = await response.json();
+    throw {
+      code: response.status,
+      message: error.message || 'An error occurred',
+      details: `Error fetching Available Currencies data from ${response.url}`,
+    } as HandledError;
+  }
+
+  const data = await response.json();
+
+  return data.map((availableCurrency: AvailableCurrency) => ({
+    code: availableCurrency.code,
+    description: availableCurrency.description,
+  }));
+}
+
+export async function getAvailableCurrenciesData(): Promise<AvailableCurrency[]> {
+  try {
+    const token = await getAuthToken();
+
+    if (!token) {
+      throw {
+        code: 401,
+        message: 'Não autorizado',
+        details: 'Authorization token not found in cookies',
+      } as HandledError;
+    }
+
+    const response = await fetch(`${API_URL}/currencies/list`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      next: {
+        revalidate: 84600, // cache de 1 dia
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw {
+        code: response.status,
+        message: errorData.message || 'Failed to fetch available currencies',
+        details: `Error fetching available currencies from ${response.url}`,
+      } as HandledError;
+    }
+
+    return handleAvaliableCurrenciesResponse(response);
   } catch (error) {
     console.error('Currency service error:', error);
     throw error;
   }
 }
 
-// Exemplo com mais operações
-export async function currencyService() {
-  const token = await getAuthToken();
 
-  return {
-    async getCurrency(code: string) {
-      const response = await fetch(`${API_URL}/currencies/${code}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      return response.json();
-    },
 
-    async updateRate(code: string, rate: number) {
-      const response = await fetch(`${API_URL}/currencies/${code}/rate`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ rate }),
-      });
-      return response.json();
-    },
-  };
-}

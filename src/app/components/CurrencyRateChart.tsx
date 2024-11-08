@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
-import { CurrencyQuotationHistoryDto } from '@/app/types/BaseCurrency';
+import { CurrencyQuotationHistoryDto } from '@/app/interfaces/BaseCurrency';
 import { paginate, SortOrder } from '@/app/utils/PaginatedResult';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/16/solid';
 import { formatDateToISO, formatDateToISOCustom } from '@/app/utils/DateUtils';

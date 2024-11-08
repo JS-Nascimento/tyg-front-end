@@ -2,7 +2,7 @@ import React from 'react';
 import WorkArea from '@/app/components/WorkArea';
 import CurrencyRateChart from '@/app/components/CurrencyRateChart';
 import { getCurrencyHistory } from '@/app/services/CurrencyService';
-import { CurrencyQuotationHistoryDto } from '@/app/types/BaseCurrency';
+import { CurrencyQuotationHistoryDto } from '@/app/interfaces/BaseCurrency';
 import { fetchCurrencyHistory } from '@/app/actions/currencyActions';
 
 interface PageProps {

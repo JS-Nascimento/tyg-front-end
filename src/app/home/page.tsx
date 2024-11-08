@@ -1,58 +1,75 @@
-// app/page.tsx
-import React, { ReactNode } from 'react';
+'use client';
+
+import React, { Suspense, useEffect, useState } from 'react';
 import DashboardArea from '../components/DashboardArea';
-import type { Metadata } from 'next';
 import CurrencyItemCard, { CurrencyItemCardProps } from '@/app/components/CurrencyItemCard';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
-import { getCurrencyData } from '@/app/services/CurrencyService';
+import { toast } from 'react-toastify';
+import { BaseCurrency, Currency } from '@/app/interfaces/BaseCurrency';
+import CurrencyItemCardSkeleton from '@/app/components/syncfusion/CurrencyItemCardSkeleton';
 
 type CardProps = {
   order: number;
   title: string;
-  content: ReactNode;
+  content: React.ReactNode;
   size: { w: number; h: number };
-}
-
-export const metadata: Metadata = {
-  title: 'TYG Investments',
-  description: 'Track your growth investments',
 };
 
-export default async function Home() {
-  // Buscar dados diretamente no servidor
-  let currencyData: CardProps[] | undefined;
+export default function Home() {
+  const [currencyData, setCurrencyData] = useState<CardProps[] | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const baseCurrency = await getCurrencyData();
-    if (baseCurrency && baseCurrency.currencies.length > 0) {
+  useEffect(() => {
+    const fetchCurrencyData = async () => {
+     setLoading(true);
+      try {
+        const response = await fetch('/api/currencies');
+        if (!response.ok) throw new Error('Failed to fetch currency data');
 
-      currencyData = baseCurrency.currencies
-        .filter(currency => currency.code !== baseCurrency.code)
-        .map((currency, index) => {
-        const props: CurrencyItemCardProps = {
-          code: currency.code,
-          name: currency.name,
-          symbol: currency.symbol,
-          baseCurrency: baseCurrency.code,
-          decimalPlaces: currency.decimalPlaces,
-          conversionRate: currency.conversionRate,
-          icon: getCurrencyIconPath(currency.code),
-        };
-        return {
-          order: index + 1,
-          title: currency.symbol,
-          content: <CurrencyItemCard {...props} />,
-          size: { w: 3, h: 2 },
-        };
-      });
-    }
-  } catch (error) {
-    console.error('Failed to fetch currency data:', error);
-    currencyData = undefined;
-  }
+        const baseCurrency = await response.json();
+        if (baseCurrency && baseCurrency.currencies.length > 0) {
+          const data = baseCurrency.currencies
+            .filter((currency: BaseCurrency) => currency.code !== baseCurrency.code)
+            .map((currency: Currency, index: number) => {
+              const props: CurrencyItemCardProps = {
+                code: currency.code,
+                name: currency.name,
+                symbol: currency.symbol,
+                baseCurrency: baseCurrency.code,
+                decimalPlaces: currency.decimalPlaces,
+                conversionRate: currency.conversionRate,
+                icon: getCurrencyIconPath(currency.code),
+              };
+              return {
+                order: index + 1,
+                title: currency.symbol,
+                content: <CurrencyItemCard {...props} />,
+                size: { w: 3, h: 2 },
+              };
+            });
+          setCurrencyData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching currency data:', error);
+        toast.error('Failed to load currency data');
+      } finally {
+       setLoading(false);
+      }
+    };
 
-  // Renderiza `DashboardArea` com os dados de moeda
+    fetchCurrencyData().then(r => r);
+  }, []);
   return (
-    <DashboardArea title="Dashboard" cards={currencyData} />
+    <>
+      {loading ? (
+
+        <DashboardArea
+          title="Dashboard"
+          cards={Array(4).fill({ content: <CurrencyItemCardSkeleton />, size: { w: 3, h: 2 } })}
+        />
+      ) : (
+        <DashboardArea title="Dashboard" cards={currencyData || []} />
+      )}
+    </>
   );
 }

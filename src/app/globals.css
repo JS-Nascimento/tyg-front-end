@@ -1,6 +1,10 @@
+@import "https://cdn.syncfusion.com/ej2/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Syncfusion Essential JS 2 Global Styles */
+
 
 /* Configuração das variáveis de cor para temas claros e escuros */
 :root {

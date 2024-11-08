@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/16/solid';
 import { BellIcon, PrinterIcon } from '@heroicons/react/24/solid';
 import NotificationDropdown from '@/app/components/NotificationDropdown';
-import { Notification } from '@/app/types/Notification';
+import { Notification } from '@/app/interfaces/Notification';
 import { useAuth } from '@/app/hook/useAuth';
 
 interface SidebarProps {

@@ -1,60 +1,82 @@
+// app/currency/page.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import CurrencyBoard from '@/app/components/CurrencyBoard';
 import WorkArea from '@/app/components/WorkArea';
+import CurrencyBoardSkeleton from '@/app/components/CurrencyBoardSkeleton';
+import { CurrencyCardDto, AvailableCurrency, BaseCurrency, Currency } from '@/app/interfaces/BaseCurrency';
+import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
+import { toast } from 'react-toastify';
+import Skeleton from '@/app/components/Skeleton';
 
+export default function CurrencyPage() {
+  const [baseCurrencyData, setBaseCurrencyData] = useState<string>('');
+  const [currenciesData, setCurrenciesData] = useState<CurrencyCardDto[]>([]);
+  const [availableCurrenciesList, setAvailableCurrenciesList] = useState<AvailableCurrency[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function Currency() {
+  const fetchData = async () => {
+    try {
+      const [currenciesResponse, availableCurrenciesResponse] = await Promise.all([
+        fetch('/api/currencies', { cache: 'no-store' }),
+        fetch('/api/currencies/availableCurrencies', { cache: 'no-store' })
+      ]);
 
-  const currencyData= [
-      {
-        code: 'USD',
-        name: 'Dólar Americano',
-        quotation: '5.30',
-        rate: '1.00',
-        image: 'https://flagcdn.com/20x15/us.png',
-      },
-      {
-        code: 'EUR',
-        name: 'Euro',
-        quotation: '6.20',
-        rate: '0.85',
-        image: 'https://flagcdn.com/20x15/eu.png',
-      },
-      {
-        code: 'GBP',
-        name: 'Libra Esterlina',
-        quotation: '7.50',
-        rate: '0.75',
-        image: 'https://flagcdn.com/20x15/gb.png',
-      },
-      {
-        code: 'JPY',
-        name: 'Iene Japonês',
-        quotation: '0.05',
-        rate: '200.00',
-        image: 'https://flagcdn.com/20x15/jp.png',
-      },
-      {
-        code: 'CNY',
-        name: 'Yuan Chinês',
-        quotation: '0.80',
-        rate: '1.25',
-        image: 'https://flagcdn.com/20x15/cn.png',
-      },
-      {
-        code: 'BRL',
-        name: 'Real Brasileiro',
-        quotation: '1.00',
-        rate: '1.00',
-        image: 'https://flagcdn.com/20x15/br.png',
+      if (!currenciesResponse.ok || !availableCurrenciesResponse.ok) {
+        throw new Error('Failed to fetch currencies data.');
       }
 
-  ];
+      const baseCurrency: BaseCurrency = await currenciesResponse.json();
+      const availableCurrencies: AvailableCurrency[] = await availableCurrenciesResponse.json();
+
+      // Processa os dados da moeda base e as currencies disponíveis
+      if (baseCurrency && baseCurrency.currencies.length > 0) {
+        setBaseCurrencyData(`${baseCurrency.code} - ${baseCurrency.name}`);
+
+        const processedCurrencies = baseCurrency.currencies.map((currency: Currency) => ({
+          baseCurrency: baseCurrency.code,
+          code: currency.code,
+          name: currency.name,
+          quotation: (1 / currency.conversionRate.rate).toFixed(2),
+          rate: currency.conversionRate.rate.toFixed(currency.decimalPlaces),
+          image: getCurrencyIconPath(currency.code),
+        }));
+
+        setCurrenciesData(processedCurrencies);
+
+        // Filtra `availableCurrencies` removendo aquelas que já estão em `processedCurrencies`
+        const processedCurrencyCodes = new Set(processedCurrencies.map((currency) => currency.code));
+        setAvailableCurrenciesList(
+          availableCurrencies.filter((currency) => !processedCurrencyCodes.has(currency.code))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching currency data:', error);
+      toast.error('Failed to fetch currency data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData().then(r => r);
+  }, []);
 
   return (
-
-      <WorkArea title={"Moedas"}>
-      <CurrencyBoard title={'BRL - Real Brasileiro'}  data={currencyData}/>
-      </WorkArea>
-
-  )
+    <WorkArea title="Moedas">
+      {loading ? (
+        <CurrencyBoardSkeleton />
+      ) : (
+        <Suspense fallback={<CurrencyBoardSkeleton />}>
+          <CurrencyBoard
+            title={baseCurrencyData ?? ''}
+            data={currenciesData ?? []}
+            availableCurrencies={availableCurrenciesList ?? []}
+          />
+        </Suspense>
+      )}
+    </WorkArea>
+  );
 }

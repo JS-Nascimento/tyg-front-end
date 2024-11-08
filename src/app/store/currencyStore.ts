@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CurrencyQuotationHistoryDto } from '@/app/types/BaseCurrency';
+import { CurrencyQuotationHistoryDto } from '@/app/interfaces/BaseCurrency';
 
 interface CurrencyStore {
   currencyData: CurrencyQuotationHistoryDto[];

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InboxArrowDownIcon } from '@heroicons/react/20/solid';
-import { Notification } from '@/app/types/Notification';
+import { Notification } from '@/app/interfaces/Notification';
 
 
 interface NotificationDropdownProps {
