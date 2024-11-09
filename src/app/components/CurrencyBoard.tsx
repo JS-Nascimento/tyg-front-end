@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CurrencyDollarIcon } from '@heroicons/react/24/solid';
-import { toast } from 'react-toastify';
 import CurrencyCard from '@/app/components/CurrencyBoardCard';
 import AddCurrencyModal from '@/app/components/AddCurrencyModal';
 import { AvailableCurrency, BaseCurrency } from '@/app/interfaces/BaseCurrency';
 import { useLoading } from '@/app/components/LoadingSystem';
 import { getErrorByCode } from '@/app/errors/ErrorMessages';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
+import { useToast } from '@/app/services/ToastService';
+
 
 interface CurrencyData {
   baseCurrency: string;
@@ -34,6 +35,7 @@ export default function CurrencyBoard({
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [currencyList, setCurrencyList] = useState<CurrencyData[]>(data);
   const [availableCurrencyList, setAvailableCurrencyList] = useState<AvailableCurrency[]>(availableCurrencies);
+  const { showToast } = useToast();
 
   const mapperToCurrencyData = (data: BaseCurrency): CurrencyData[] => {
     return data.currencies
@@ -70,12 +72,16 @@ export default function CurrencyBoard({
       updateAvailableCurrencies(mappedData);
 
     } catch (error) {
-      toast.error('Erro ao buscar dados de moedas.');
+      showToast({
+        title: 'Erro',
+        content: 'Erro ao buscar dados de moedas.',
+        type: 'error'
+      });
       console.error('Unexpected error:', error);
     } finally {
       stopLoading();
     }
-  }, [updateAvailableCurrencies, startLoading, stopLoading]);
+  }, [updateAvailableCurrencies, startLoading, stopLoading, showToast]);
 
   // Atualiza os dados ao montar o componente
   useEffect(() => {
@@ -83,7 +89,11 @@ export default function CurrencyBoard({
 
   const handleSaveCurrency = async (selectedCurrencyCode: string) => {
     if (!selectedCurrencyCode) {
-      toast.error('Selecione uma moeda');
+      showToast({
+        title: 'Atenção',
+        content: 'Por favor selecione uma moeda.',
+        type: 'warning'
+      });
       return;
     }
 
@@ -102,14 +112,26 @@ export default function CurrencyBoard({
       if (!response.ok) {
         const { errorCode } = result;
         const error = getErrorByCode(errorCode);
-        toast.error(error.message);
+        showToast({
+          title: error.errorCode.toString() || 'Erro',
+          content: error.message || 'Erro ao adicionar moeda',
+          type: 'error'
+        });
         return;
       }
 
-      toast.success(result.message || 'Moeda adicionada com sucesso!');
+      showToast({
+        title: 'Sucesso',
+        content: 'Moeda adicionada com sucesso!',
+        type: 'success'
+      });
       await fetchData(); // Atualiza a lista após inserção bem-sucedida
     } catch (error) {
-      toast.error('Ocorreu um erro inesperado ao adicionar a moeda.');
+      showToast({
+        title: 'Erro',
+        content:'Ocorreu um erro inesperado ao adicionar a moeda.',
+        type: 'error'
+      });
       console.error('Unexpected error:', error);
     } finally {
       stopLoading();

@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/20/solid';
 import { useTheme } from '../themes/ThemeContext';
 import { useAuth } from '@/app/hook/useAuth';
+import Link from 'next/link';
 
 interface UserProfileProps {
   title: string;
@@ -130,13 +131,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
                 className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
               Perfil
             </a>
-            <a href="#"
-               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
-               role="menuitem">
+            <Link
+              href="/settings"
+              className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
+            >
               <AdjustmentsHorizontalIcon
-                className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />
+                className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100"
+              />
               Configurações
-            </a>
+            </Link>
             <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
             <div className="py-2 px-4">
               <span className="flex items-center gap-2">

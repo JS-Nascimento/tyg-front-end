@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardArea from '../components/DashboardArea';
 import CurrencyItemCard, { CurrencyItemCardProps } from '@/app/components/CurrencyItemCard';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';

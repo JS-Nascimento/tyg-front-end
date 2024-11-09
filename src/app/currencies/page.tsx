@@ -8,14 +8,15 @@ import WorkArea from '@/app/components/WorkArea';
 import CurrencyBoardSkeleton from '@/app/components/CurrencyBoardSkeleton';
 import { CurrencyCardDto, AvailableCurrency, BaseCurrency, Currency } from '@/app/interfaces/BaseCurrency';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
-import { toast } from 'react-toastify';
-import Skeleton from '@/app/components/Skeleton';
+import { useToast } from '@/app/services/ToastService';
+
 
 export default function CurrencyPage() {
   const [baseCurrencyData, setBaseCurrencyData] = useState<string>('');
   const [currenciesData, setCurrenciesData] = useState<CurrencyCardDto[]>([]);
   const [availableCurrenciesList, setAvailableCurrenciesList] = useState<AvailableCurrency[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   const fetchData = async () => {
     try {
@@ -51,10 +52,16 @@ export default function CurrencyPage() {
         setAvailableCurrenciesList(
           availableCurrencies.filter((currency) => !processedCurrencyCodes.has(currency.code))
         );
+
+
       }
     } catch (error) {
       console.error('Error fetching currency data:', error);
-      toast.error('Failed to fetch currency data');
+      showToast({
+        title: 'Erro',
+        content: 'Erro ao buscar dados de moedas.',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }

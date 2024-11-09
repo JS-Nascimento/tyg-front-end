@@ -10,6 +10,7 @@ import { LoadingProvider } from '@/app/components/LoadingSystem';
 import { registerLicense } from '@syncfusion/ej2-base';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastProvider } from './services/ToastService';
 
 // Syncfusion provider
 const SyncfusionProvider = ({ children }: { children: React.ReactNode }) => {
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <LoadingProvider>
         <ThemeProvider>
           <SyncfusionProvider>
+            <ToastProvider>
             {shouldRenderSidebar ? (
               <Sidebar logoUrl={'/tyg-logo.png'}>
                 {children}
@@ -60,6 +62,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 theme="colored"
               />
             )}
+            </ToastProvider>
           </SyncfusionProvider>
         </ThemeProvider>
       </LoadingProvider>
