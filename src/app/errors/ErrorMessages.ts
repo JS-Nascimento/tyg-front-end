@@ -1,5 +1,10 @@
 // app/constants/ErrorMessages.ts
 export const ErrorMessages = {
+  InvalidCredentials: {
+    errorCode: 1001,
+    httpStatus: 401,
+    message: 'Credenciais inválidas.',
+  },
   CurrencyNameNull: {
     errorCode: 1008,
     httpStatus: 400,
@@ -29,7 +34,47 @@ export const ErrorMessages = {
     errorCode: 1001,
     httpStatus: 400,
     message: 'Url de requisição malformada',
-  }
+  },
+  RequestFailed:{
+    errorCode: 1002,
+    httpStatus: 400,
+    message: 'A Requisição não retornou nenhum dado.',
+  },
+  InvalidBaseCurrency:{
+    errorCode: 1003,
+    httpStatus: 400,
+    message: 'Moeda base inválida.',
+  },
+  InvalidZoneTime:{
+    errorCode: 1004,
+    httpStatus: 400,
+    message: 'Fuso horário inválido.',
+  },
+  InvalidLocale:{
+    errorCode: 1005,
+    httpStatus: 400,
+    message: 'Local inválido.',
+  },
+  InvalidDecimalPlaces:{
+    errorCode: 1006,
+    httpStatus: 400,
+    message: 'Casas decimais inválidas.',
+  },
+  InvalidCurrencyDecimalPlaces:{
+    errorCode: 1007,
+    httpStatus: 400,
+    message: 'Casas decimais de moeda inválidas.',
+  },
+  InvalidDarkMode:{
+    errorCode: 1008,
+    httpStatus: 400,
+    message: 'Selecione corretamente o tema .',
+  },
+  UnexpectedError:{
+    errorCode: 1009,
+    httpStatus: 500,
+    message: 'Erro inesperado.',
+  },
 
 } as const;
 

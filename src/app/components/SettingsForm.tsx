@@ -1,24 +1,210 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { TabComponent, TabItemDirective, TabItemsDirective } from '@syncfusion/ej2-react-navigations';
 import { SwitchComponent } from '@syncfusion/ej2-react-buttons';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
 import { AvailableCurrency } from '@/app/interfaces/BaseCurrency';
-
+import { Locale, Timezone } from '@/app/interfaces/SettingsOptions';
+import { DialogComponent } from '@syncfusion/ej2-react-popups';
+import { GrUserSettings } from 'react-icons/gr';
+import { useToast } from '@/app/services/ToastService';
+import { useLoading } from '@/app/components/LoadingSystem';
+import { UserDataSettings } from '@/app/types/User';
+import { getErrorByCode } from '@/app/errors/ErrorMessages';
+import DecimalInput from '@/app/components/syncfusion/NumericInput';
+import { useSession } from 'next-auth/react';
 
 interface SettingsFormProps {
   availableCurrencies: AvailableCurrency[];
+  availableTimezones: Timezone[];
+  availableLocales: Locale[];
+  actualSettings: UserDataSettings;
 }
 
-export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
-  const [darkMode, setDarkMode] = useState(false);
+export default function SettingsForm({
+                                       availableCurrencies,
+                                       availableTimezones,
+                                       availableLocales,
+                                       actualSettings,
+                                     }: SettingsFormProps) {
+  const [settings, setSettings] = useState(() => ({
+    baseCurrency: actualSettings.baseCurrency || '',
+    decimalPlaces: actualSettings.decimalPlaces || 4,
+    currencyDecimalPlaces: actualSettings.currencyDecimalPlaces || 2,
+    timezone: actualSettings.zoneTime || '',
+    locale: actualSettings.locale || '',
+    darkMode: actualSettings.darkMode || false,
+  }));
+  const { data: session, update } = useSession();
+  const [showDialog, setShowDialog] = useState(false);
+  const { startLoading, stopLoading, isLoading } = useLoading();
+  const { showToast } = useToast();
 
   const headerText = [
     { text: 'Aparência' },
     { text: 'Preferências' },
   ];
 
+  // Para o DropDownList
+  interface DropDownChangeEventArgs {
+    value: string;
+    text: string;
+    element: HTMLElement;
+  }
+
+// Para o Switch
+  interface SwitchChangeEventArgs {
+    checked: boolean;
+    element: HTMLElement;
+  }
+
+  const handleCurrencyChange = useCallback((args: DropDownChangeEventArgs) => {
+    setSettings(prev => ({ ...prev, baseCurrency: args.value }));
+  }, []);
+
+  const handleDecimalPlacesChange = useCallback((value: number) => {
+    if (value !== null && value !== undefined) {
+      setSettings(prev => ({ ...prev, decimalPlaces: value }));
+    }
+  }, []);
+
+  const handleCurrencyDecimalPlacesChange = useCallback((value: number) => {
+    if (value !== null && value !== undefined) {
+      setSettings(prev => ({ ...prev, currencyDecimalPlaces: value }));
+    }
+  }, []);
+
+  const handleTimezoneChange = useCallback((args: DropDownChangeEventArgs) => {
+    setSettings(prev => ({ ...prev, timezone: args.value }));
+  }, []);
+
+  const handleLocaleChange = useCallback((args: DropDownChangeEventArgs) => {
+    setSettings(prev => ({ ...prev, locale: args.value }));
+  }, []);
+
+  const handleDarkModeChange = useCallback((args: SwitchChangeEventArgs) => {
+    setSettings(prev => ({ ...prev, darkMode: args.checked }));
+  }, []);
+  const handleSave = useCallback(async () => {
+
+    if (!settings.baseCurrency) {
+      showToast({
+        title: 'Atenção',
+        content: 'Por favor selecione uma moeda base.',
+        type: 'warning',
+      });
+      return;
+    }
+
+    if (!settings.timezone) {
+      showToast({
+        title: 'Atenção',
+        content: 'Por favor selecione um Fuso horário.',
+        type: 'warning',
+      });
+      return;
+    }
+
+    if (!settings.locale) {
+      showToast({
+        title: 'Atenção',
+        content: 'Por favor selecione uma configuração regional.',
+        type: 'warning',
+      });
+      return;
+    }
+
+    startLoading();
+    const data = {
+      baseCurrency: settings.baseCurrency,
+      zoneTime: settings.timezone,
+      locale: settings.locale,
+      decimalPlaces: settings.decimalPlaces,
+      currencyDecimalPlaces: settings.currencyDecimalPlaces,
+      darkMode: settings.darkMode,
+    };
+
+    try {
+      const response = await fetch('/api/settings/save', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const { errorCode } = result;
+        const error = getErrorByCode(errorCode);
+        showToast({
+          title: error.errorCode.toString() || 'Erro',
+          content: error.message || 'Erro ao salvar configurações',
+          type: 'error',
+        });
+        return;
+      }
+      // Atualizar a sessão com as novas configurações
+      if (session) {
+        await update({
+          ...session,
+          user: {
+            ...session.user,
+            settings: data
+          }
+        });
+      }
+      showToast({
+        title: 'Sucesso',
+        content: 'Configurações salvas com sucesso!',
+        type: 'success',
+      });
+
+    } catch (error) {
+      showToast({
+        title: 'Erro',
+        content: 'Ocorreu um erro inesperado ao salvar configurações.',
+        type: 'error',
+      });
+      console.error('Unexpected error:', error);
+    } finally {
+      stopLoading();
+      console.log('Settings saved');
+      setShowDialog(false);
+    }
+
+  }, [settings, startLoading, stopLoading, showToast, session, update]);
+
+  const dialogButtons = [
+    {
+      buttonModel: {
+        content: 'Cancelar',
+        cssClass: 'e-flat',
+      },
+      click: () => setShowDialog(false),
+    },
+    {
+      buttonModel: {
+        content: 'Confirmar',
+        cssClass: 'e-flat e-primary',
+      },
+      click: handleSave,
+    },
+  ];
+  //
+  // useEffect(() => {
+  //   if (actualSettings.currencyDecimalPlaces !== undefined) {
+  //     setCurrencyDecimalPlaces(actualSettings.currencyDecimalPlaces);
+  //   }
+  //
+  //   if (actualSettings.decimalPlaces !== undefined) {
+  //     setDecimalPlaces(actualSettings.decimalPlaces);
+  //   }
+  // }, [actualSettings.currencyDecimalPlaces, actualSettings.decimalPlaces]);
+
   const AppearanceTab = () => (
+
     <div className="px-0.5 py-3">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Coluna 1 - Tema */}
@@ -33,8 +219,8 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
                 </p>
               </div>
               <SwitchComponent
-                checked={darkMode}
-                change={(args) => setDarkMode(args.checked)}
+                checked={settings.darkMode}
+                change={(args) => handleDarkModeChange(args)}
                 onLabel="On"
                 offLabel="Off"
                 cssClass="e-bigger"
@@ -154,17 +340,44 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
               </p>
               <DropDownListComponent
                 dataSource={availableCurrencies.map(
-                  (currency) => ({ text: `${currency.code} - ${currency.description}`, value: currency.code })
+                  (currency) => ({ text: `${currency.code} - ${currency.description}`, value: currency.code }),
                 )}
                 fields={{ text: 'text', value: 'value' }}
-                value="America/Sao_Paulo"
+                value={settings.baseCurrency}
+                change={(args) => handleCurrencyChange(args)}
                 popupHeight="200px"
                 popupWidth="400px"
                 placeholder="Selecione a moeda"
                 floatLabelType="Auto"
               />
             </div>
+            <div>
+              <p className="font-medium text-gray-700 dark:text-gray-200 mb-1">Formatação Decimal</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Selecione a quantidade de casas decimais para valores monetários
+              </p>
+              <DecimalInput
+                value={settings.currencyDecimalPlaces}
+                onChange={handleCurrencyDecimalPlacesChange}
+                min={2}
+                max={6}
+                placeholder="Selecione a quantidade de casas decimais"
+              />
 
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Selecione a quantidade de casas decimais para valores percentuais e taxas
+              </p>
+              <DecimalInput
+                value={settings.decimalPlaces}
+                onChange={handleDecimalPlacesChange}
+                min={1}
+                max={8}
+                placeholder="Selecione a quantidade de casas decimais"
+              />
+
+            </div>
             {/*<div className="flex justify-between items-center">*/}
             {/*  <div>*/}
             {/*    <p className="font-medium text-gray-700 dark:text-gray-200">Contraste Alto</p>*/}
@@ -190,14 +403,12 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
                 Selecione seu fuso horário
               </p>
               <DropDownListComponent
-                dataSource={[
-                  { text: 'América/São Paulo (UTC-3)', value: 'America/Sao_Paulo' },
-                  { text: 'América/New York (UTC-4)', value: 'America/New_York' },
-                  { text: 'Europa/Londres (UTC+0)', value: 'Europe/London' },
-                  { text: 'Ásia/Tokyo (UTC+9)', value: 'Asia/Tokyo' },
-                ]}
+                dataSource={availableTimezones.map(
+                  (timezone) => ({ text: `${timezone.description}`, value: timezone.zoneId }),
+                )}
                 fields={{ text: 'text', value: 'value' }}
-                value="America/Sao_Paulo"
+                value={settings.timezone}
+                change={(args) => handleTimezoneChange(args)}
                 popupHeight="200px"
                 popupWidth="300px"
                 placeholder="Selecione o fuso horário"
@@ -211,14 +422,12 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
                 Localização regional
               </p>
               <DropDownListComponent
-                dataSource={[
-                  { text: 'Brasil', value: 'BR' },
-                  { text: 'Estados Unidos', value: 'US' },
-                  { text: 'Espanha', value: 'ES' },
-                  { text: 'Japão', value: 'JP' },
-                ]}
+                dataSource={availableLocales.map(
+                  (locale) => ({ text: `${locale.description}`, value: locale.code }),
+                )}
                 fields={{ text: 'text', value: 'value' }}
-                value="BR"
+                value={settings.locale}
+                change={(args) => handleLocaleChange(args)}
                 popupHeight="200px"
                 popupWidth="200px"
                 placeholder="Selecione o país"
@@ -267,14 +476,30 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
         {/*  </div>*/}
         {/*</div>*/}
       </div>
-</div>
-)
-  ;
+    </div>
+  );
 
   return (
     <div className="w-full max-w-8xl mx-auto p-2">
-      <div
-        className="bg-white dark:bg-background-alternativedark text-zinc-900 dark:text-gray-50 shadow-sm rounded-lg">
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowDialog(true)}
+          disabled={isLoading}
+          className={`text-white bg-blue-700 hover:bg-blue-700/90 focus:ring-4
+                focus:ring-blue-700/50 focus:outline-none font-medium rounded-lg
+                text-sm px-5 py-2.5 text-center inline-flex items-center
+                dark:focus:ring-[#2557D6]/50
+                ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <GrUserSettings className="h-6 w-6 font-black" />
+          <span className="ml-1.5">
+                {isLoading ? 'Processando...' : 'Salvar Configurações'}
+              </span>
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-background-alternativedark text-zinc-900 dark:text-gray-50 shadow-sm rounded-lg">
         <TabComponent
           heightAdjustMode="Auto"
           showCloseButton={false}
@@ -295,6 +520,18 @@ export default function SettingsForm({availableCurrencies}:SettingsFormProps) {
           </TabItemsDirective>
         </TabComponent>
       </div>
+
+      <DialogComponent
+        width="400px"
+        height="200px"
+        isModal={true}
+        visible={showDialog}
+        buttons={dialogButtons}
+        header="Salvar Alterações"
+        content="Tem certeza que deseja salvar as alterações realizadas?"
+        showCloseIcon={true}
+        close={() => setShowDialog(false)}
+      />
     </div>
   );
 }

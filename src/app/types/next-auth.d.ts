@@ -1,5 +1,6 @@
 // src/types/next-auth.d.ts
 import 'next-auth';
+import { UserDataSettings } from '@/app/types/User';
 
 declare module 'next-auth' {
 
@@ -15,6 +16,7 @@ declare module 'next-auth' {
     name: string;
     email: string;
     avatar: string;
+    settings: UserDataSettings;
   }
 
   interface User extends UserData, TokenData {}
@@ -22,6 +24,7 @@ declare module 'next-auth' {
   interface JWT extends TokenData {
     sub?: string;
     error?: string;
+    settings: UserDataSettings;
   }
   interface Session {
     expires: string;

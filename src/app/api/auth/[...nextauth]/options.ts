@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { NextAuthOptions } from 'next-auth';
 import { jwtVerify } from 'jose';
 import { JWT } from 'next-auth/jwt';
+import { UserDataSettings } from '@/app/types/User';
 
 interface AuthResponse {
   accessToken: string;
@@ -24,6 +25,7 @@ interface User {
   name: string;
   email: string;
   enabled: boolean;
+  settings: UserDataSettings;
 }
 
 async function getUserInfo(token: string): Promise<User> {
@@ -43,7 +45,7 @@ async function getUserInfo(token: string): Promise<User> {
         credentials: 'include',
       },
     );
-    console.log('API URL:', `${process.env.URL_API_TYG_INVESTMENTS}/${process.env.API_PATH_V1}/users/me`);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
       console.error('Error response:', {
@@ -57,6 +59,7 @@ async function getUserInfo(token: string): Promise<User> {
     const userInfo: User = await response.json();
 
     if (!userInfo.tenantId || !userInfo.name) {
+
       throw new Error('Invalid user info response');
     }
 
@@ -65,6 +68,7 @@ async function getUserInfo(token: string): Promise<User> {
       name: userInfo.name,
       email: userInfo.email,
       enabled: userInfo.enabled,
+      settings: userInfo.settings,
     };
   } catch (error) {
 
@@ -119,6 +123,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       name: userInfo.name,
       email: decodedToken.preferred_username,
       avatar: '',
+      settings: userInfo.settings,
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
@@ -169,6 +174,7 @@ export const authOptions: NextAuthOptions = {
             id: userInfo.tenantId,
             name: userInfo.name,
             email: decodedToken.preferred_username,
+            settings: userInfo.settings,
             accessToken: auth.accessToken,
             refreshToken: auth.refreshToken,
             expiresIn: Date.now() + auth.expiresIn,
@@ -186,18 +192,25 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, session, trigger }) {
       if (user) {
+
         return {
+          ...token,
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
-          expiresIn: user.expiresIn, // This is a timestamp in milliseconds
+          expiresIn: user.expiresIn,
           tokenType: user.tokenType,
           sub: user.id,
           name: user.name,
           email: user.email,
           avatar: user.avatar,
+          settings: user.settings,
         };
+      }
+      // Se for uma atualização de sessão
+      if (trigger === "update" && session?.settings) {
+        token.settings = session.settings;
       }
 
       const now = Date.now();
@@ -209,28 +222,27 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    async session({ session, token }) {
+    async session({ session, token, trigger, newSession }) {
 
-      // Attach any errors to the session
-      if (token.error) {
-        console.error('Error in token:', token.error);
+      if (trigger === "update" && newSession?.user?.settings) {
+        token.settings = newSession.user.settings;
       }
 
-      // Add custom properties to the session.user object
       if (session.user) {
         session.user.id = token.sub as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.avatar = token.avatar as string;
+        session.user.settings = token.settings as UserDataSettings;
       }
 
-      // Attach the token data to the session
       session.token = {
         accessToken: token.accessToken as string,
         refreshToken: token.refreshToken as string,
         expiresIn: token.expiresIn as number,
         tokenType: token.tokenType as string,
       };
+
       return session;
     },
   },
