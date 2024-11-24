@@ -1,3 +1,4 @@
+// Description: Tailwind CSS configuration file.
 import type { Config } from 'tailwindcss';
 import flowbitePlugin from 'flowbite/plugin';
 
@@ -7,9 +8,10 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    './node_modules/@syncfusion/**/*.{js,ts,jsx,tsx,mdx}',
+    './node_modules/@syncfusion/**/*.{js,ts,jsx,tsx,mdx,html}',
+    './src/**/*.scss', // Include SCSS files
   ],
-  important: true,
+
   theme: {
     extend: {
       colors: {
@@ -45,4 +47,5 @@ const config: Config = {
     flowbitePlugin,
   ],
 };
+
 export default config;

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TabComponent, TabItemDirective, TabItemsDirective } from '@syncfusion/ej2-react-navigations';
 import { SwitchComponent } from '@syncfusion/ej2-react-buttons';
 import { DropDownListComponent } from '@syncfusion/ej2-react-dropdowns';
@@ -13,6 +13,8 @@ import { UserDataSettings } from '@/app/types/User';
 import { getErrorByCode } from '@/app/errors/ErrorMessages';
 import DecimalInput from '@/app/components/syncfusion/NumericInput';
 import { useSession } from 'next-auth/react';
+import { useUserStore } from '@/app/store/userStore';
+import { useTheme } from '../themes/ThemeContext';
 
 interface SettingsFormProps {
   availableCurrencies: AvailableCurrency[];
@@ -27,18 +29,22 @@ export default function SettingsForm({
                                        availableLocales,
                                        actualSettings,
                                      }: SettingsFormProps) {
+  console.log(actualSettings);
+
   const [settings, setSettings] = useState(() => ({
     baseCurrency: actualSettings.baseCurrency || '',
     decimalPlaces: actualSettings.decimalPlaces || 4,
     currencyDecimalPlaces: actualSettings.currencyDecimalPlaces || 2,
-    timezone: actualSettings.zoneTime || '',
+    zoneTime: actualSettings.zoneTime || '',
     locale: actualSettings.locale || '',
     darkMode: actualSettings.darkMode || false,
   }));
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const { data: session, update } = useSession();
-  const [showDialog, setShowDialog] = useState(false);
+  const [ showDialog, setShowDialog ]  = useState(false);
   const { startLoading, stopLoading, isLoading } = useLoading();
   const { showToast } = useToast();
+  const { updateSettings } = useUserStore();
 
   const headerText = [
     { text: 'Aparência' },
@@ -75,7 +81,7 @@ export default function SettingsForm({
   }, []);
 
   const handleTimezoneChange = useCallback((args: DropDownChangeEventArgs) => {
-    setSettings(prev => ({ ...prev, timezone: args.value }));
+    setSettings(prev => ({ ...prev, zoneTime: args.value }));
   }, []);
 
   const handleLocaleChange = useCallback((args: DropDownChangeEventArgs) => {
@@ -83,8 +89,11 @@ export default function SettingsForm({
   }, []);
 
   const handleDarkModeChange = useCallback((args: SwitchChangeEventArgs) => {
-    setSettings(prev => ({ ...prev, darkMode: args.checked }));
-  }, []);
+    const newDarkMode = args.checked;
+    toggleDarkMode();
+    setSettings(prev => ({ ...prev, darkMode: newDarkMode }));
+  }, [toggleDarkMode]);
+
   const handleSave = useCallback(async () => {
 
     if (!settings.baseCurrency) {
@@ -96,7 +105,7 @@ export default function SettingsForm({
       return;
     }
 
-    if (!settings.timezone) {
+    if (!settings.zoneTime) {
       showToast({
         title: 'Atenção',
         content: 'Por favor selecione um Fuso horário.',
@@ -117,7 +126,7 @@ export default function SettingsForm({
     startLoading();
     const data = {
       baseCurrency: settings.baseCurrency,
-      zoneTime: settings.timezone,
+      zoneTime: settings.zoneTime,
       locale: settings.locale,
       decimalPlaces: settings.decimalPlaces,
       currencyDecimalPlaces: settings.currencyDecimalPlaces,
@@ -145,16 +154,10 @@ export default function SettingsForm({
         });
         return;
       }
+
       // Atualizar a sessão com as novas configurações
-      if (session) {
-        await update({
-          ...session,
-          user: {
-            ...session.user,
-            settings: data
-          }
-        });
-      }
+      updateSettings(settings);
+
       showToast({
         title: 'Sucesso',
         content: 'Configurações salvas com sucesso!',
@@ -174,7 +177,7 @@ export default function SettingsForm({
       setShowDialog(false);
     }
 
-  }, [settings, startLoading, stopLoading, showToast, session, update]);
+  }, [settings, startLoading, stopLoading, showToast, session, update, updateSettings]);
 
   const dialogButtons = [
     {
@@ -192,16 +195,20 @@ export default function SettingsForm({
       click: handleSave,
     },
   ];
-  //
+
   // useEffect(() => {
-  //   if (actualSettings.currencyDecimalPlaces !== undefined) {
-  //     setCurrencyDecimalPlaces(actualSettings.currencyDecimalPlaces);
-  //   }
-  //
-  //   if (actualSettings.decimalPlaces !== undefined) {
-  //     setDecimalPlaces(actualSettings.decimalPlaces);
-  //   }
-  // }, [actualSettings.currencyDecimalPlaces, actualSettings.decimalPlaces]);
+  //   setSettings(prev => ({ ...prev, darkMode: isDarkMode }));
+  // }, [isDarkMode]);
+
+  useEffect(() => {
+    if (actualSettings.darkMode !== undefined) {
+        if(actualSettings.darkMode !== isDarkMode) {
+          toggleDarkMode();
+        }
+      setSettings((prev) => ({ ...prev, darkMode: actualSettings.darkMode }));
+    }
+  }, [actualSettings.darkMode]);
+
 
   const AppearanceTab = () => (
 
@@ -348,7 +355,7 @@ export default function SettingsForm({
                 popupHeight="200px"
                 popupWidth="400px"
                 placeholder="Selecione a moeda"
-                floatLabelType="Auto"
+                floatLabelType="Always"
               />
             </div>
             <div>
@@ -407,12 +414,12 @@ export default function SettingsForm({
                   (timezone) => ({ text: `${timezone.description}`, value: timezone.zoneId }),
                 )}
                 fields={{ text: 'text', value: 'value' }}
-                value={settings.timezone}
+                value={settings.zoneTime}
                 change={(args) => handleTimezoneChange(args)}
                 popupHeight="200px"
                 popupWidth="300px"
                 placeholder="Selecione o fuso horário"
-                floatLabelType="Auto"
+                floatLabelType="Always"
               />
             </div>
 
@@ -431,7 +438,7 @@ export default function SettingsForm({
                 popupHeight="200px"
                 popupWidth="200px"
                 placeholder="Selecione o país"
-                floatLabelType="Auto"
+                floatLabelType="Always"
               />
             </div>
           </div>

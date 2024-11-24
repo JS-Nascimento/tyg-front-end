@@ -39,7 +39,7 @@ const DecimalInput = React.memo(({ value, onChange, min, max, placeholder }: Dec
         }
       }}
       placeholder={placeholder}
-      floatLabelType="Auto"
+      floatLabelType="Always"
     />
   );
 });

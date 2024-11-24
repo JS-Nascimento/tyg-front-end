@@ -1,14 +1,13 @@
 // app/currency/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Suspense } from 'react';
-import CurrencyBoard from '@/app/components/CurrencyBoard';
+import { Suspense, useEffect, useState } from 'react';
 import WorkArea from '@/app/components/WorkArea';
 import CurrencyBoardSkeleton from '@/app/components/CurrencyBoardSkeleton';
-import { CurrencyCardDto, AvailableCurrency, BaseCurrency, Currency } from '@/app/interfaces/BaseCurrency';
+import { AvailableCurrency, BaseCurrency, Currency, CurrencyCardDto } from '@/app/interfaces/BaseCurrency';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
 import { useToast } from '@/app/services/ToastService';
+import CurrencyDataGrid from '@/app/components/syncfusion/CurrencyDataGrid/CurrencyDataGrid';
 
 
 export default function CurrencyPage() {
@@ -77,7 +76,7 @@ export default function CurrencyPage() {
         <CurrencyBoardSkeleton />
       ) : (
         <Suspense fallback={<CurrencyBoardSkeleton />}>
-          <CurrencyBoard
+          <CurrencyDataGrid
             title={baseCurrencyData ?? ''}
             data={currenciesData ?? []}
             availableCurrencies={availableCurrenciesList ?? []}

@@ -1,6 +1,6 @@
 
 export type User = {
-  id: string;
+  tenantId: string;
   email: string;
   name: string;
   image?: string;
@@ -16,5 +16,5 @@ export interface UserDataSettings {
   locale: string;
   decimalPlaces: number;
   currencyDecimalPlaces: number;
-  darkMode: boolean
+  darkMode: boolean;
 }

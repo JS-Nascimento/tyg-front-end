@@ -15,7 +15,6 @@ declare module 'next-auth' {
     id: string;
     name: string;
     email: string;
-    avatar: string;
     settings: UserDataSettings;
   }
 
@@ -24,7 +23,6 @@ declare module 'next-auth' {
   interface JWT extends TokenData {
     sub?: string;
     error?: string;
-    settings: UserDataSettings;
   }
   interface Session {
     expires: string;

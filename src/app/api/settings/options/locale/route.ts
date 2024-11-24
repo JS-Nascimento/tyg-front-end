@@ -39,7 +39,7 @@ export async function GET() {
       errorCode: errorInfo.errorCode,
       errorMessage: errorInfo.message,
       errorSource: 'SERVER',
-      errorPath: 'API Route: /settings/options/timezones',
+      errorPath: 'API Route: /settings/options/locales',
       errorTimestamp: new Date().toISOString(),
     }, { status: errorInfo.httpStatus });
   }

@@ -16,6 +16,7 @@ import {
 import { useTheme } from '../themes/ThemeContext';
 import { useAuth } from '@/app/hook/useAuth';
 import Link from 'next/link';
+import { useLoading } from '@/app/components/LoadingSystem';
 
 interface UserProfileProps {
   title: string;
@@ -40,7 +41,14 @@ const UserProfile: React.FC<UserProfileProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { isDarkMode, toggleDarkMode } = useTheme();
   const menuRef = useRef<HTMLDivElement>(null);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const { startLoading } = useLoading();
+
+  const selectedConfig =() => {
+
+    toggleMenu();
+    startLoading();
+  }
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -60,6 +68,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
   };
 
   useEffect(() => {
+    if(user?.settings.darkMode !== isDarkMode) {
+      toggleDarkMode();
+    }
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -122,7 +133,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
           </div>
 
           <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
-          <div className="py-1" role="menu" aria-orientation="vertical">
+          <div className="py-1 e-mousepointer" role="menu" aria-orientation="vertical">
             {/* Opções do menu */}
             <a href="#"
                className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
@@ -133,6 +144,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             </a>
             <Link
               href="/settings"
+              onClick={selectedConfig}
               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
             >
               <AdjustmentsHorizontalIcon
@@ -169,7 +181,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             </div>
             <div className="border-t border-zinc-200 dark:border-zinc-600"></div>
             <a onClick={handleLogout}
-               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600"
+               className="flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-blue-600 cursor-pointer"
                role="menuitem">
               <ArrowRightStartOnRectangleIcon
                 className="h-4 w-4 mr-2 text-zinc-700 dark:text-zinc-200 hover:text-zinc-900 dark:hover:text-zinc-100" />

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface ThemeContextType {
@@ -12,20 +12,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Verifica se está no lado do cliente antes de acessar o document
-    if (typeof document !== 'undefined') {
-      const initialTheme = document.documentElement.classList.contains('dark');
-      setIsDarkMode(initialTheme);
+    const currentTheme = isDarkMode
+      ? 'styles/tailwind-dark.min.css'
+      : 'styles/tailwind.min.css';
+
+    const link = document.getElementById('theme-css') as HTMLLinkElement;
+    if (link) {
+      link.href = currentTheme;
+    } else {
+      const newLink = document.createElement('link');
+      newLink.id = 'theme-css';
+      newLink.rel = 'stylesheet';
+      newLink.href = currentTheme;
+      document.head.appendChild(newLink);
     }
-  }, []);
+  }, [isDarkMode]);
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode((prev) => !prev);
     if (typeof document !== 'undefined') {
+      const html = document.documentElement;
       if (!isDarkMode) {
-        document.documentElement.classList.add('dark');
+        html.classList.add('dark');
       } else {
-        document.documentElement.classList.remove('dark');
+        html.classList.remove('dark');
       }
     }
   };

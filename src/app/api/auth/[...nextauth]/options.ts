@@ -29,6 +29,7 @@ interface User {
 }
 
 async function getUserInfo(token: string): Promise<User> {
+
   try {
     if (!token || token === 'undefined') {
       throw new Error('Missing token');
@@ -122,8 +123,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       id: userInfo.tenantId,
       name: userInfo.name,
       email: decodedToken.preferred_username,
-      avatar: '',
-      settings: userInfo.settings,
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
@@ -170,6 +169,7 @@ export const authOptions: NextAuthOptions = {
 
           const userInfo = await getUserInfo(auth.accessToken);
 
+
           return {
             id: userInfo.tenantId,
             name: userInfo.name,
@@ -179,7 +179,6 @@ export const authOptions: NextAuthOptions = {
             refreshToken: auth.refreshToken,
             expiresIn: Date.now() + auth.expiresIn,
             tokenType: auth.tokenType,
-            avatar: '',
           };
         } catch (error) {
           console.error('Authorization error:', error);
@@ -192,7 +191,7 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
   },
   callbacks: {
-    async jwt({ token, user, session, trigger }) {
+    async jwt({ token, user }) {
       if (user) {
 
         return {
@@ -204,13 +203,8 @@ export const authOptions: NextAuthOptions = {
           sub: user.id,
           name: user.name,
           email: user.email,
-          avatar: user.avatar,
           settings: user.settings,
         };
-      }
-      // Se for uma atualização de sessão
-      if (trigger === "update" && session?.settings) {
-        token.settings = session.settings;
       }
 
       const now = Date.now();
@@ -222,18 +216,13 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    async session({ session, token, trigger, newSession }) {
+    async session({ session, token }) {
 
-      if (trigger === "update" && newSession?.user?.settings) {
-        token.settings = newSession.user.settings;
-      }
 
       if (session.user) {
         session.user.id = token.sub as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
-        session.user.avatar = token.avatar as string;
-        session.user.settings = token.settings as UserDataSettings;
       }
 
       session.token = {

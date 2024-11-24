@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import DashboardArea from '../components/DashboardArea';
 import CurrencyItemCard, { CurrencyItemCardProps } from '@/app/components/CurrencyItemCard';
 import { getCurrencyIconPath } from '@/app/types/CurrencyIcon';
-import { toast } from 'react-toastify';
 import { BaseCurrency, Currency } from '@/app/interfaces/BaseCurrency';
 import CurrencyItemCardSkeleton from '@/app/components/syncfusion/CurrencyItemCardSkeleton';
+import { useToast } from '@/app/services/ToastService';
 
 type CardProps = {
   order: number;
@@ -16,6 +16,7 @@ type CardProps = {
 };
 
 export default function Home() {
+  const { showToast } = useToast();
   const [currencyData, setCurrencyData] = useState<CardProps[] | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
@@ -51,14 +52,18 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Error fetching currency data:', error);
-        toast.error('Failed to load currency data');
+        showToast({
+          title: 'Erro',
+          content: 'Erro ao buscar dados de moedas.',
+          type: 'error',
+        });
       } finally {
        setLoading(false);
       }
     };
 
     fetchCurrencyData().then(r => r);
-  }, []);
+  }, [showToast]);
   return (
     <>
       {loading ? (
